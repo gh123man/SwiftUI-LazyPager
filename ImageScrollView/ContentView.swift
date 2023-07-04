@@ -177,8 +177,6 @@ struct ZoomableScrollView<Content: View, BottomContent: View, DataType>: UIViewR
                 loadedContent.heightAnchor.constraint(equalTo: scrollView.frameLayoutGuide.heightAnchor),
             ])
             
-           
-            
             currentView = loadedContent
         }
         
@@ -240,6 +238,10 @@ struct ZoomableScrollView<Content: View, BottomContent: View, DataType>: UIViewR
             updateState(scrollView)
         }
         
+        func viewForZooming(in scrollView: UIScrollView) -> UIView? {
+            return currentView
+        }
+        
         func updateState(_ scrollView: UIScrollView) {
             
 //            allowScroll = scrollView.zoomScale == 1
@@ -252,32 +254,36 @@ struct ZoomableScrollView<Content: View, BottomContent: View, DataType>: UIViewR
 //            }
         }
         
+        func scrollViewWillBeginZooming(_ scrollView: UIScrollView, with view: UIView?) {
+            
+        }
+        
         func scrollViewDidZoom(_ scrollView: UIScrollView) {
-//            guard let imageView = hostingController.view else {
-//                return
-//            }
-//            let w: CGFloat = imageView.intrinsicContentSize.width * UIScreen.main.scale
-//            let h: CGFloat = imageView.intrinsicContentSize.height * UIScreen.main.scale
-//
-//
-//            let ratioW = imageView.frame.width / w
-//            let ratioH = imageView.frame.height / h
-//
-//            let ratio = ratioW < ratioH ? ratioW : ratioH
-//
-//            let newWidth = w*ratio
-//            let newHeight = h*ratio
-//
-//            let left = 0.5 * (newWidth * scrollView.zoomScale > imageView.frame.width
-//                              ? (newWidth - imageView.frame.width)
-//                              : (scrollView.frame.width - imageView.frame.width))
-//            let top = 0.5 * (newHeight * scrollView.zoomScale > imageView.frame.height
-//                             ? (newHeight - imageView.frame.height)
-//                             : (scrollView.frame.height - imageView.frame.height))
-//
-//            scrollView.contentInset = UIEdgeInsets(top: top, left: left, bottom: top, right: left)
-//
-//            updateState(scrollView)
+            guard let imageView = currentView else {
+                return
+            }
+            let w: CGFloat = imageView.intrinsicContentSize.width * UIScreen.main.scale
+            let h: CGFloat = imageView.intrinsicContentSize.height * UIScreen.main.scale
+
+
+            let ratioW = imageView.frame.width / w
+            let ratioH = imageView.frame.height / h
+
+            let ratio = ratioW < ratioH ? ratioW : ratioH
+
+            let newWidth = w*ratio
+            let newHeight = h*ratio
+
+            let left = 0.5 * (newWidth * scrollView.zoomScale > imageView.frame.width
+                              ? (newWidth - imageView.frame.width)
+                              : (scrollView.frame.width - imageView.frame.width))
+            let top = 0.5 * (newHeight * scrollView.zoomScale > imageView.frame.height
+                             ? (newHeight - imageView.frame.height)
+                             : (scrollView.frame.height - imageView.frame.height))
+
+            scrollView.contentInset = UIEdgeInsets(top: top, left: left, bottom: top, right: left)
+
+            updateState(scrollView)
         }
     }
 }
