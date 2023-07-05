@@ -91,6 +91,11 @@ struct ZoomableScrollView<Content: View, BottomContent: View, DataType>: UIViewR
         var contentTopToContent: NSLayoutConstraint!
         var contentBottomToFrame: NSLayoutConstraint!
         
+        var allowScroll: Bool = true
+        var wasTracking = false
+        var isAnimating = false
+        var lastInset: CGFloat = 0
+        
         var isFirstLoad = false
 
         private var internalIndex: Int = 0
@@ -116,8 +121,18 @@ struct ZoomableScrollView<Content: View, BottomContent: View, DataType>: UIViewR
             
             scrollView.delegate = self
             computeViewState()
+            
+            scrollView.addObserver(self, forKeyPath: "contentOffset", context: nil)
         }
         
+        override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey: Any]?, context: UnsafeMutableRawPointer?) {
+            guard let scrollView = object as? UIScrollView else { return }
+            updateState(scrollView)
+        }
+        
+        deinit {
+            scrollView.removeObserver(self, forKeyPath: "contentOffset")
+        }
         
         required init?(coder: NSCoder) {
             fatalError("init(coder:) has not been implemented")
@@ -296,6 +311,59 @@ struct ZoomableScrollView<Content: View, BottomContent: View, DataType>: UIViewR
             if !isFirstLoad {
                 goToPage(currentIndex)
                 isFirstLoad = true
+            }
+        }
+        
+        func updateState(_ scrollView: UIScrollView) {
+                    
+            allowScroll = scrollView.zoomScale == 1
+
+            if scrollView.contentOffset.y > 10 && scrollView.zoomScale == 1 {
+                allowScroll = true
+//                compresView(by: 0)
+                scrollView.pinchGestureRecognizer?.isEnabled = false
+            } else {
+                scrollView.pinchGestureRecognizer?.isEnabled = true
+            }
+            
+            if allowScroll {
+                let contentHeight = scrollView.contentSize.height
+                let scrollViewHeight = scrollView.bounds.size.height
+                let offset = scrollView.contentOffset.y
+
+                let percentage = (offset / (contentHeight - scrollViewHeight)) * 100
+                
+                if percentage < 1, !isAnimating, (scrollView.isTracking || lastInset < 0) {
+//                    let norm = normalize(from: 0, to: 20, by: abs(percentage))
+//                    let scale = CGFloat(1 - norm)
+//                    scrollView.alpha = scale
+                    
+                    
+                    
+//                    compresView(by: percentage)
+                }
+                
+            
+                if wasTracking, percentage < -10, !scrollView.isTracking {
+                    isAnimating = true
+                    let ogFram = scrollView.frame.origin
+                    DispatchQueue.main.async {
+                        UIView.animate(withDuration: 0.3, animations: {
+                            
+                            scrollView.frame.origin = CGPoint(x: 0, y: scrollView.frame.size.height)
+                            scrollView.alpha = 0
+                        }) { _ in
+                            
+                            DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1)) {
+                                scrollView.frame.origin = ogFram
+                                scrollView.alpha = 1
+                                self.isAnimating = false
+                            }
+                        }
+                    }
+                }
+            
+                wasTracking = scrollView.isTracking
             }
         }
         
