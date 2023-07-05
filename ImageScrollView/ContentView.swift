@@ -92,11 +92,8 @@ struct ZoomableScrollView<Content: View, BottomContent: View, DataType>: UIViewR
         var contentBottomToFrame: NSLayoutConstraint!
         
         var isFirstLoad = false
-        var skipNextUpdate = false
 
-        
         private var internalIndex: Int = 0
-        
         var currentIndex: Int = 0 {
             didSet {
                 computeViewState()
@@ -153,13 +150,11 @@ struct ZoomableScrollView<Content: View, BottomContent: View, DataType>: UIViewR
             if let firstView = loadedViews.first {
                 let diff = currentIndex - firstView.index
                 if diff < (preloadAmount) {
-                    print("from: \((firstView.index - (preloadAmount - diff))) to \(firstView.index)")
                     for i in (firstView.index - (preloadAmount - diff)..<firstView.index).reversed() {
                         prependView(at: i)
                     }
                 }
             }
-            print(loadedViews.map { $0.index })
             self.removeOutOfFrameViews()
             print(self.loadedViews.map { $0.index })
         }
@@ -184,7 +179,6 @@ struct ZoomableScrollView<Content: View, BottomContent: View, DataType>: UIViewR
                 firstView.leadingConstraint?.isActive = true
                 
                 if firstView.index > index {
-                    skipNextUpdate = true
                     scrollView.contentOffset.x -= scrollView.frame.size.width
                     internalIndex -= 1
                 }
@@ -211,16 +205,27 @@ struct ZoomableScrollView<Content: View, BottomContent: View, DataType>: UIViewR
             return ZoomableView(view: loadedContent, index: index)
         }
         
-        func appendView(at index: Int) {
-            guard let zoomView = loadView(at: index) else {
-                return
-            }
+        func addSubview(_ zoomView: ZoomableView) {
             scrollView.addSubview(zoomView)
             NSLayoutConstraint.activate([
                 zoomView.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor),
                 zoomView.heightAnchor.constraint(equalTo: scrollView.frameLayoutGuide.heightAnchor),
             ])
+        }
+        
+        func addFirstView(_ zoomView: ZoomableView) {
+            zoomView.leadingConstraint = zoomView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor)
+            zoomView.trailingConstraint = zoomView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor)
+            zoomView.leadingConstraint?.isActive = true
+            zoomView.trailingConstraint?.isActive = true
+        }
+        
+        func appendView(at index: Int) {
+            guard let zoomView = loadView(at: index) else {
+                return
+            }
             
+            addSubview(zoomView)
             
             if let lastView = loadedViews.last {
                 lastView.trailingConstraint?.isActive = false
@@ -232,10 +237,7 @@ struct ZoomableScrollView<Content: View, BottomContent: View, DataType>: UIViewR
                 zoomView.trailingConstraint?.isActive = true
                 
             } else {
-                zoomView.leadingConstraint = zoomView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor)
-                zoomView.trailingConstraint = zoomView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor)
-                zoomView.leadingConstraint?.isActive = true
-                zoomView.trailingConstraint?.isActive = true
+                addFirstView(zoomView)
             }
             loadedViews.append(zoomView)
         }
@@ -244,12 +246,8 @@ struct ZoomableScrollView<Content: View, BottomContent: View, DataType>: UIViewR
             guard let zoomView = loadView(at: index) else {
                 return
             }
-            scrollView.addSubview(zoomView)
             
-            NSLayoutConstraint.activate([
-                zoomView.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor),
-                zoomView.heightAnchor.constraint(equalTo: scrollView.frameLayoutGuide.heightAnchor),
-            ])
+            addSubview(zoomView)
             
             if let firstView = loadedViews.first {
                 firstView.leadingConstraint?.isActive = false
@@ -261,14 +259,9 @@ struct ZoomableScrollView<Content: View, BottomContent: View, DataType>: UIViewR
                 zoomView.trailingConstraint?.isActive = true
                 
             } else {
-                
-                zoomView.leadingConstraint = zoomView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor)
-                zoomView.trailingConstraint = zoomView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor)
-                zoomView.leadingConstraint?.isActive = true
-                zoomView.trailingConstraint?.isActive = true
+                addFirstView(zoomView)
             }
             
-            skipNextUpdate = true
             scrollView.contentOffset.x += scrollView.frame.size.width
             internalIndex += 1
             loadedViews.insert(zoomView, at: 0)
@@ -287,7 +280,6 @@ struct ZoomableScrollView<Content: View, BottomContent: View, DataType>: UIViewR
             let visibleRect = CGRect(origin: scrollView.contentOffset, size: scrollView.bounds.size)
             let subviewFrame = scrollView.convert(subview.frame, from: subview.superview)
             let intersectionRect = visibleRect.intersection(subviewFrame)
-            
             return !intersectionRect.isNull && intersectionRect.size.height > 0 && intersectionRect.size.width > 0
         }
         
