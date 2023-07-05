@@ -10,19 +10,22 @@ import SwiftUI
 
 struct ContentView: View {
     
-    @State var data = [
-        "winter1",
-        "winter8",
-        "birthday2"
-    ]
+//    @State var data = [
+//        "winter1",
+//        "winter8",
+//        "birthday2"
+//    ]
     
+    @State var data2 = Array((0...20))
     var body: some View {
         
         VStack {
-            ZoomableScrollView(data: data) { data in
-                Image(data)
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
+            ZoomableScrollView(data: data2, index: 5) { data in
+                Text("\(data)")
+                    .font(.title)
+//                Image(data)
+//                    .resizable()
+//                    .aspectRatio(contentMode: .fit)
             } bottomContent: {
                 Text("hi")
             }
@@ -42,116 +45,162 @@ struct ZoomableScrollView<Content: View, BottomContent: View, DataType>: UIViewR
     private var viewLoader: (DataType) -> Content
     private var bottomContent: BottomContent
     private var data: [DataType]
+    private var index: Int
     
-    init(data: [DataType], content: @escaping (DataType) -> Content, @ViewBuilder bottomContent: () -> BottomContent) {
+    init(data: [DataType], index: Int, content: @escaping (DataType) -> Content, @ViewBuilder bottomContent: () -> BottomContent) {
         self.data = data
+        self.index = index
         self.viewLoader = content
         self.bottomContent = bottomContent()
     }
 
     func makeUIView(context: Context) -> UIScrollView {
-        return context.coordinator.setupScrollView()
+        context.coordinator.goToPage(index)
+        return context.coordinator.scrollView
     }
     
-
     func makeCoordinator() -> Coordinator {
         return Coordinator(data: data,
+                           startIndex: index,
                            viewLoader: viewLoader,
                            bottomController: UIHostingController(rootView: self.bottomContent))
     }
 
     func updateUIView(_ uiView: UIScrollView, context: Context) {
+        // set index here
+        context.coordinator.goToPage(index)
 //        context.coordinator.hostingController.rootView = self.content
 //        assert(context.coordinator.hostingController.view.superview == uiView)
     }
 
     // MARK: - Coordinator
 
-    class Coordinator: NSObject, UIScrollViewDelegate {
+    class Coordinator: UIScrollView, UIScrollViewDelegate {
         private var viewLoader: (DataType) -> Content
         
         var data: [DataType]
         
-        var scrollView = UIScrollView()
+        let preloadAmount = 1
+        
+        var scrollView: UIScrollView {
+            return self
+        }
+        var loadedViews = [ZoomableView]()
         
         var contentTopToFrame: NSLayoutConstraint!
         var contentTopToContent: NSLayoutConstraint!
         var contentBottomToFrame: NSLayoutConstraint!
         
-        var currentView: UIView?
-        var curretnIndex = 0
+        var isFirstLoad = false
+        var skipNextUpdate = false
+
         
-        init(data: [DataType], viewLoader: @escaping (DataType) -> Content, bottomController: UIHostingController<BottomContent>) {
+        private var internalIndex: Int = 0
+        
+        var currentIndex: Int = 0 {
+            didSet {
+                computeViewState()
+            }
+        }
+        
+        init(data: [DataType], startIndex: Int, viewLoader: @escaping (DataType) -> Content, bottomController: UIHostingController<BottomContent>) {
             self.data = data
             self.viewLoader = viewLoader
-        }
-
-        func setupScrollView() -> UIScrollView {
-            scrollView.delegate = self
+            currentIndex = startIndex
+            super.init(frame: .zero)
+            
             scrollView.showsVerticalScrollIndicator = false
             scrollView.showsHorizontalScrollIndicator = false
-            scrollView.backgroundColor = .clear
+            scrollView.backgroundColor = .gray
             scrollView.isPagingEnabled = true
             
             scrollView.layer.borderColor = CGColor.init(red: 0, green: 255, blue: 0, alpha: 1)
             scrollView.layer.borderWidth = 2
             
-            loadView(at: 0)
-            loadNext()
-            return scrollView
+            scrollView.delegate = self
+            computeViewState()
         }
         
-        func makeZommableView(view: UIView) -> UIView {
-            let sv = UIScrollView()
-            sv.translatesAutoresizingMaskIntoConstraints = false
-            sv.delegate = self
-            sv.maximumZoomScale = 10
-            sv.minimumZoomScale = 1
-            sv.bouncesZoom = true
-            sv.addSubview(view)
+        
+        required init?(coder: NSCoder) {
+            fatalError("init(coder:) has not been implemented")
+        }
+        
+        func computeViewState() {
+            scrollView.delegate = nil
+            DispatchQueue.main.async {
+                self.scrollView.delegate = self
+            }
             
-            NSLayoutConstraint.activate([
-                view.leadingAnchor.constraint(equalTo: sv.leadingAnchor),
-                view.trailingAnchor.constraint(equalTo: sv.trailingAnchor),
-                view.widthAnchor.constraint(equalTo: sv.frameLayoutGuide.widthAnchor),
-                view.heightAnchor.constraint(equalTo: sv.frameLayoutGuide.heightAnchor),
-            ])
-            return sv
+            if scrollView.subviews.isEmpty {
+                for i in currentIndex...(currentIndex + preloadAmount) {
+                    appendView(at: i)
+                }
+                for i in ((currentIndex - preloadAmount)..<currentIndex).reversed() {
+                    prependView(at: i)
+                }
+            }
+            
+            if let lastView = loadedViews.last {
+                let diff = lastView.index - currentIndex
+                if diff < (preloadAmount) {
+                    for i in lastView.index..<(lastView.index + (preloadAmount - diff)) {
+                        appendView(at: i + 1)
+                    }
+                }
+            }
+            
+            if let firstView = loadedViews.first {
+                let diff = currentIndex - firstView.index
+                if diff < (preloadAmount) {
+                    print("from: \((firstView.index - (preloadAmount - diff))) to \(firstView.index)")
+                    for i in (firstView.index - (preloadAmount - diff)..<firstView.index).reversed() {
+                        prependView(at: i)
+                    }
+                }
+            }
+            print(loadedViews.map { $0.index })
+            self.removeOutOfFrameViews()
+            print(self.loadedViews.map { $0.index })
         }
         
-        func loadView(at index: Int) {
+        func removeOutOfFrameViews() {
+            for view in loadedViews {
+                if abs(currentIndex - view.index) > preloadAmount {
+                    remove(view: view)
+                }
+            }
+        }
+        
+        func remove(view: ZoomableView) {
+            let index = view.index
+            loadedViews.removeAll { $0.index == view.index }
+            view.removeFromSuperview()
+            
+            if let firstView = loadedViews.first {
+                firstView.leadingConstraint?.isActive = false
+                firstView.leadingConstraint = nil
+                firstView.leadingConstraint = firstView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor)
+                firstView.leadingConstraint?.isActive = true
+                
+                if firstView.index > index {
+                    skipNextUpdate = true
+                    scrollView.contentOffset.x -= scrollView.frame.size.width
+                    internalIndex -= 1
+                }
+            }
+            
+            if let lastView = loadedViews.last {
+                lastView.trailingConstraint?.isActive = false
+                lastView.trailingConstraint = nil
+                lastView.trailingConstraint = lastView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor)
+                lastView.trailingConstraint?.isActive = true
+            }
+        }
+        
+        func loadView(at index: Int) -> ZoomableView? {
             guard let dta = data[safe: index] else {
-                return
-            }
-            curretnIndex = index
-            
-            let loadedContent = UIHostingController(rootView: viewLoader(dta)).view!
-            
-            loadedContent.translatesAutoresizingMaskIntoConstraints = false
-            loadedContent.backgroundColor = .clear
-            
-            let sv = makeZommableView(view: loadedContent)
-            scrollView.addSubview(sv)
-            
-            NSLayoutConstraint.activate([
-                
-                sv.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
-//                sv.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-                sv.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor),
-                sv.heightAnchor.constraint(equalTo: scrollView.frameLayoutGuide.heightAnchor),
-                
-            ])
-            
-            currentView = sv
-        }
-        
-        func loadNext() {
-            guard let dta = data[safe: curretnIndex + 1] else {
-                return
-            }
-            
-            guard let currentView = currentView else {
-                return
+                return nil
             }
             
             let loadedContent = UIHostingController(rootView: viewLoader(dta)).view!
@@ -159,49 +208,105 @@ struct ZoomableScrollView<Content: View, BottomContent: View, DataType>: UIViewR
             loadedContent.translatesAutoresizingMaskIntoConstraints = false
             loadedContent.backgroundColor = .clear
             
-            let sv = makeZommableView(view: loadedContent)
-            scrollView.addSubview(sv)
-            
+            return ZoomableView(view: loadedContent, index: index)
+        }
+        
+        func appendView(at index: Int) {
+            guard let zoomView = loadView(at: index) else {
+                return
+            }
+            scrollView.addSubview(zoomView)
             NSLayoutConstraint.activate([
-                sv.leadingAnchor.constraint(equalTo: currentView.trailingAnchor),
-                sv.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
-                sv.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor),
-                sv.heightAnchor.constraint(equalTo: scrollView.frameLayoutGuide.heightAnchor),
+                zoomView.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor),
+                zoomView.heightAnchor.constraint(equalTo: scrollView.frameLayoutGuide.heightAnchor),
             ])
             
-        }
-        
-        func viewForZooming(in scrollView: UIScrollView) -> UIView? {
-            return scrollView.subviews[0]
-        }
-        
-        
-        func scrollViewDidZoom(_ scrollView: UIScrollView) {
-            let imageView = scrollView.subviews[0]
             
-            let w: CGFloat = imageView.intrinsicContentSize.width * UIScreen.main.scale
-            let h: CGFloat = imageView.intrinsicContentSize.height * UIScreen.main.scale
-
-
-            let ratioW = imageView.frame.width / w
-            let ratioH = imageView.frame.height / h
-
-            let ratio = ratioW < ratioH ? ratioW : ratioH
-
-            let newWidth = w*ratio
-            let newHeight = h*ratio
-
-            let left = 0.5 * (newWidth * scrollView.zoomScale > imageView.frame.width
-                              ? (newWidth - imageView.frame.width)
-                              : (scrollView.frame.width - imageView.frame.width))
-            let top = 0.5 * (newHeight * scrollView.zoomScale > imageView.frame.height
-                             ? (newHeight - imageView.frame.height)
-                             : (scrollView.frame.height - imageView.frame.height))
-
-            scrollView.contentInset = UIEdgeInsets(top: top, left: left, bottom: top, right: left)
-
-//            updateState(scrollView)
+            if let lastView = loadedViews.last {
+                lastView.trailingConstraint?.isActive = false
+                lastView.trailingConstraint = nil
+                
+                zoomView.leadingConstraint = zoomView.leadingAnchor.constraint(equalTo: lastView.trailingAnchor)
+                zoomView.trailingConstraint = zoomView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor)
+                zoomView.leadingConstraint?.isActive = true
+                zoomView.trailingConstraint?.isActive = true
+                
+            } else {
+                zoomView.leadingConstraint = zoomView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor)
+                zoomView.trailingConstraint = zoomView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor)
+                zoomView.leadingConstraint?.isActive = true
+                zoomView.trailingConstraint?.isActive = true
+            }
+            loadedViews.append(zoomView)
         }
+        
+        func prependView(at index: Int) {
+            guard let zoomView = loadView(at: index) else {
+                return
+            }
+            scrollView.addSubview(zoomView)
+            
+            NSLayoutConstraint.activate([
+                zoomView.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor),
+                zoomView.heightAnchor.constraint(equalTo: scrollView.frameLayoutGuide.heightAnchor),
+            ])
+            
+            if let firstView = loadedViews.first {
+                firstView.leadingConstraint?.isActive = false
+                firstView.leadingConstraint = nil
+                
+                zoomView.leadingConstraint = zoomView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor)
+                zoomView.trailingConstraint = zoomView.trailingAnchor.constraint(equalTo: firstView.leadingAnchor)
+                zoomView.leadingConstraint?.isActive = true
+                zoomView.trailingConstraint?.isActive = true
+                
+            } else {
+                
+                zoomView.leadingConstraint = zoomView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor)
+                zoomView.trailingConstraint = zoomView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor)
+                zoomView.leadingConstraint?.isActive = true
+                zoomView.trailingConstraint?.isActive = true
+            }
+            
+            skipNextUpdate = true
+            scrollView.contentOffset.x += scrollView.frame.size.width
+            internalIndex += 1
+            loadedViews.insert(zoomView, at: 0)
+        }
+        
+        func scrollViewDidScroll(_ scrollView: UIScrollView) {
+            let visible = loadedViews.first { isSubviewVisible($0, in: scrollView) }
+            let newIndex = loadedViews.firstIndex(where: { $0.index == visible?.index })!
+            if newIndex != internalIndex {
+                currentIndex = visible!.index
+                internalIndex = newIndex
+            }
+        }
+        
+        func isSubviewVisible(_ subview: UIView, in scrollView: UIScrollView) -> Bool {
+            let visibleRect = CGRect(origin: scrollView.contentOffset, size: scrollView.bounds.size)
+            let subviewFrame = scrollView.convert(subview.frame, from: subview.superview)
+            let intersectionRect = visibleRect.intersection(subviewFrame)
+            
+            return !intersectionRect.isNull && intersectionRect.size.height > 0 && intersectionRect.size.width > 0
+        }
+        
+        func goToPage(_ page: Int) {
+            guard let index = loadedViews.firstIndex(where: { $0.index == page }) else {
+                return
+            }
+            scrollView.contentOffset.x = CGFloat(index) * scrollView.frame.size.width
+            internalIndex = index
+        }
+        
+        override func layoutSubviews() {
+            super.layoutSubviews()
+            if !isFirstLoad {
+                goToPage(currentIndex)
+                isFirstLoad = true
+            }
+        }
+        
     }
 }
 
