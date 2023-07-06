@@ -9,7 +9,7 @@ import Foundation
 import UIKit
 import SwiftUI
 
-protocol ZoomViewDelegate: class {
+protocol ZoomViewDelegate: AnyObject {
     func fadeProgress(val: CGFloat)
     func onDismiss()
 }
@@ -31,22 +31,27 @@ class ZoomableView: UIScrollView, UIScrollViewDelegate {
     var contentTopToContent: NSLayoutConstraint!
     var contentTopToFrame: NSLayoutConstraint!
     var contentBottomToFrame: NSLayoutConstraint!
+    var contentBottomToView: NSLayoutConstraint!
     var bottomView: UIView
     weak var zoomViewDelegate: ZoomViewDelegate?
     
     var allowScroll: Bool = true {
         didSet {
             if allowScroll {
-                contentTopToContent.isActive = true
                 contentTopToFrame.isActive = false
                 contentBottomToFrame.isActive = false
                 bottomView.isHidden = false
                 
+                contentTopToContent.isActive = true
+                contentBottomToView.isActive = true
             } else {
                 contentTopToContent.isActive = false
+                contentBottomToView.isActive = false
+                
                 contentTopToFrame.isActive = true
                 contentBottomToFrame.isActive = true
                 bottomView.isHidden = true
+                
             }
         }
     }
@@ -80,20 +85,19 @@ class ZoomableView: UIScrollView, UIScrollViewDelegate {
         
         contentTopToFrame = view.topAnchor.constraint(equalTo: contentLayoutGuide.topAnchor)
         contentTopToContent = view.topAnchor.constraint(equalTo: topAnchor)
-        contentBottomToFrame = bottomAnchor.constraint(equalTo: contentLayoutGuide.bottomAnchor)
+        contentBottomToFrame = view.bottomAnchor.constraint(equalTo: contentLayoutGuide.bottomAnchor)
+        contentBottomToView = view.bottomAnchor.constraint(equalTo: v.topAnchor)
 
-        
         v.translatesAutoresizingMaskIntoConstraints = false
         addSubview(v)
         v.backgroundColor = .green
         
         
         NSLayoutConstraint.activate([
-            v.topAnchor.constraint(equalTo: view.bottomAnchor),
             v.bottomAnchor.constraint(equalTo: bottomAnchor),
             v.leadingAnchor.constraint(equalTo: frameLayoutGuide.leadingAnchor),
             v.trailingAnchor.constraint(equalTo: frameLayoutGuide.trailingAnchor),
-            v.heightAnchor.constraint(equalToConstant: 1)
+            v.heightAnchor.constraint(equalToConstant: 50)
         ])
         
         addObserver(self, forKeyPath: "contentOffset", context: nil)
