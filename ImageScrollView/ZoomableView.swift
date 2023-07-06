@@ -78,6 +78,8 @@ class ZoomableView: UIScrollView, UIScrollViewDelegate {
         minimumZoomScale = 1
         bouncesZoom = true
         backgroundColor = .clear
+        canCancelContentTouches = false
+        delaysContentTouches = false
         addSubview(view)
         
         NSLayoutConstraint.activate([
@@ -94,7 +96,7 @@ class ZoomableView: UIScrollView, UIScrollViewDelegate {
 
         v.translatesAutoresizingMaskIntoConstraints = false
         addSubview(v)
-        v.backgroundColor = .green
+//        v.backgroundColor = .green
         
         
         NSLayoutConstraint.activate([
@@ -162,17 +164,13 @@ class ZoomableView: UIScrollView, UIScrollViewDelegate {
 
         if contentOffset.y > 10 && zoomScale == 1 {
             allowScroll = true
-//                compresView(by: 0)
             pinchGestureRecognizer?.isEnabled = false
         } else {
             pinchGestureRecognizer?.isEnabled = true
         }
         
         if allowScroll {
-            let contentHeight = contentSize.height
-            let scrollViewHeight = bounds.size.height
             let offset = contentOffset.y
-            let percentage = (offset / (contentHeight - scrollViewHeight)) * 100
             
             if !isAnimating {
                 if offset < 0 {
@@ -184,47 +182,31 @@ class ZoomableView: UIScrollView, UIScrollViewDelegate {
                 }
             }
             
-            if percentage < 1, !isAnimating, (isTracking || lastInset < 0) {
-//                    let norm = normalize(from: 0, to: 20, by: abs(percentage))
-//                    let scale = CGFloat(1 - norm)
-//                    scrollView.alpha = scale
-//                    compresView(by: percentage)
-            }
-            
-        
-            if wasTracking, percentage < -10, !isTracking, !isZoomHappening {
-                isAnimating = true
-                let ogFram = frame.origin
-                DispatchQueue.main.async {
-                    withAnimation(.linear(duration: 0.2)) {
-                        self.zoomViewDelegate?.fadeProgress(val: 0)
-                    }
-                    UIView.animate(withDuration: 0.2, animations: {
-                        self.frame.origin = CGPoint(x: ogFram.x, y: self.frame.size.height)
-                    }) { _ in
-                        self.zoomViewDelegate?.onDismiss()
-                        
-//                        //TEMP
-//                        DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1)) {
-//                            scrollView.frame.origin = ogFram
-//                            self.zoomViewDelegate?.fadeProgress(val: 1)
-//                            self.isAnimating = false
-//                        }
-                    }
-                }
-            }
         
             wasTracking = isTracking
         }
     }
     
+    func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
+        print(velocity)
+        
+        let offset = contentOffset.y
+        let percentage = (offset / (contentSize.height - bounds.size.height)) * 100
+        
+        if wasTracking, percentage < -10, !isZoomHappening, velocity.y < -2 {
+            isAnimating = true
+            let ogFram = frame.origin
+            DispatchQueue.main.async {
+                withAnimation(.linear(duration: 0.2)) {
+                    self.zoomViewDelegate?.fadeProgress(val: 0)
+                }
+                UIView.animate(withDuration: 0.2, animations: {
+                    self.frame.origin = CGPoint(x: ogFram.x, y: self.frame.size.height)
+                }) { _ in
+                    self.zoomViewDelegate?.onDismiss()
+                }
+            }
+        }
+    }
 }
 
-
-//func repeatOnMainThread(times: Int, interval: Double, action: @escaping (Int) -> Void) {
-//    guard times > 0 else { return }
-//    DispatchQueue.main.asyncAfter(deadline: .now() + interval) {
-//        action()
-//        self.repeatOnMainThread(times: times - 1, interval: interval, action: action)
-//    }
-//}

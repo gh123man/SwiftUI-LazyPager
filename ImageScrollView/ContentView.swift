@@ -23,14 +23,16 @@ struct BackgroundClearView: UIViewRepresentable {
 
 struct ContentView: View {
     
-//    @State var data = [
-//        "winter1",
-//        "winter8",
-//        "birthday2"
-//    ]
+    @State var data = [
+        "winter1",
+        "winter8",
+        "birthday2",
+        "winter1",
+        "winter8",
+    ]
     
     @State var data2 = Array((0...20))
-    @State var show = false
+    @State var show = true
     @State var opa: CGFloat = 1
     var body: some View {
         
@@ -42,15 +44,18 @@ struct ContentView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(.red)
         .fullScreenCover(isPresented: $show) {
-            ZoomableScrollView(data: data2, index: 5) { data in
-                Text("\(data)")
-                    .font(.title)
-//                Image(data)
-//                    .resizable()
-//                    .aspectRatio(contentMode: .fit)
+            ZoomableScrollView(data: data, index: 0) { data in
+//                Text("\(data)")
+//                    .font(.title)
+                Image(data)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
             }
             .onDismiss(backgroundOpacity: $opa) {
                 show = false
+            }
+            .onTapGesture {
+                print("tap")
             }
             .background(.black.opacity(opa))
         }
@@ -64,8 +69,12 @@ struct ContentView_Previews: PreviewProvider {
 }
 
 extension ZoomableScrollView {
-    func onDismiss(backgroundOpacity: Binding<CGFloat>? = nil, _ callback: @escaping () -> ()) -> some View {
-        return ZoomableScrollView(data: self.data, index: self.index, backgroundOpacity: backgroundOpacity, onDismiss: callback, content: self.viewLoader)
+    func onDismiss(backgroundOpacity: Binding<CGFloat>? = nil, _ callback: @escaping () -> ()) -> ZoomableScrollView {
+        return ZoomableScrollView(data: self.data,
+                                  index: self.index,
+                                  backgroundOpacity: backgroundOpacity,
+                                  onDismiss: callback,
+                                  content: self.viewLoader)
     }
 }
 
@@ -79,7 +88,11 @@ struct ZoomableScrollView<Content: View, DataType>: UIViewRepresentable {
     var backgroundOpacity: Binding<CGFloat>?
     var dismissCallback: (() -> ())?
     
-    init(data: [DataType], index: Int, backgroundOpacity: Binding<CGFloat>? = nil, onDismiss: (() -> ())? = nil, content: @escaping (DataType) -> Content) {
+    init(data: [DataType],
+         index: Int,
+         backgroundOpacity: Binding<CGFloat>? = nil,
+         onDismiss: (() -> ())? = nil,
+         content: @escaping (DataType) -> Content) {
         self.data = data
         self.index = index
         self.viewLoader = content
@@ -134,10 +147,15 @@ struct ZoomableScrollView<Content: View, DataType>: UIViewRepresentable {
             }
         }
         
-        init(data: [DataType], startIndex: Int, backgroundOpacity: Binding<CGFloat>?, dismissCallback: (() -> ())?, viewLoader: @escaping (DataType) -> Content) {
+        init(data: [DataType],
+             startIndex: Int,
+             backgroundOpacity: Binding<CGFloat>?,
+             dismissCallback: (() -> ())?,
+             viewLoader: @escaping (DataType) -> Content) {
+            
             self.data = data
             self.viewLoader = viewLoader
-            currentIndex = startIndex
+            self.currentIndex = startIndex
             self.backgroundOpacity = backgroundOpacity
             self.dismissCallback = dismissCallback
             super.init(frame: .zero)
@@ -146,9 +164,6 @@ struct ZoomableScrollView<Content: View, DataType>: UIViewRepresentable {
             scrollView.showsHorizontalScrollIndicator = false
             scrollView.backgroundColor = .clear
             scrollView.isPagingEnabled = true
-            
-            scrollView.layer.borderColor = CGColor.init(red: 0, green: 255, blue: 0, alpha: 1)
-            scrollView.layer.borderWidth = 2
             
             scrollView.delegate = self
             computeViewState()
@@ -198,6 +213,7 @@ struct ZoomableScrollView<Content: View, DataType>: UIViewRepresentable {
             self.removeOutOfFrameViews()
             print(self.loadedViews.map { $0.index })
         }
+        
         
         func removeOutOfFrameViews() {
             for view in loadedViews {
@@ -281,6 +297,7 @@ struct ZoomableScrollView<Content: View, DataType>: UIViewRepresentable {
                 addFirstView(zoomView)
             }
             loadedViews.append(zoomView)
+            layoutSubviews()
         }
         
         func prependView(at index: Int) {
@@ -303,9 +320,12 @@ struct ZoomableScrollView<Content: View, DataType>: UIViewRepresentable {
                 addFirstView(zoomView)
             }
             
+            layoutSubviews()
+            
+            loadedViews.insert(zoomView, at: 0)
             scrollView.contentOffset.x += scrollView.frame.size.width
             internalIndex += 1
-            loadedViews.insert(zoomView, at: 0)
+            
         }
         
         func scrollViewDidScroll(_ scrollView: UIScrollView) {
@@ -315,10 +335,19 @@ struct ZoomableScrollView<Content: View, DataType>: UIViewRepresentable {
                 currentIndex = visible!.index
                 internalIndex = newIndex
             }
+            resizeOutOfBoundsViews()
+        }
+        
+        func resizeOutOfBoundsViews() {
+            for v in loadedViews {
+                if v.index != currentIndex, !isSubviewVisible(v, in: self) {
+                    v.zoomScale = 1
+                }
+            }
         }
         
         func isSubviewVisible(_ subview: UIView, in scrollView: UIScrollView) -> Bool {
-            let visibleRect = CGRect(origin: scrollView.contentOffset, size: scrollView.bounds.size)
+            let visibleRect = CGRect(origin: scrollView.contentOffset, size: CGSize(width: scrollView.bounds.size.width - 1, height: scrollView.bounds.size.height))
             let subviewFrame = scrollView.convert(subview.frame, from: subview.superview)
             let intersectionRect = visibleRect.intersection(subviewFrame)
             return !intersectionRect.isNull && intersectionRect.size.height > 0 && intersectionRect.size.width > 0
@@ -343,15 +372,18 @@ struct ZoomableScrollView<Content: View, DataType>: UIViewRepresentable {
             backgroundOpacity?.wrappedValue = val
         }
         func onDismiss() {
+            // Cancel swiftUI dismiss animations
             var transaction = Transaction()
             transaction.disablesAnimations = true
             withTransaction(transaction) {
                 dismissCallback?()
             }
         }
+        
+        func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+            resizeOutOfBoundsViews()
+        }
     }
-    
-    
 }
 
 extension Collection {
