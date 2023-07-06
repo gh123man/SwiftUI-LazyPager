@@ -33,7 +33,11 @@ class ZoomableView: UIScrollView, UIScrollViewDelegate {
     var contentBottomToFrame: NSLayoutConstraint!
     var contentBottomToView: NSLayoutConstraint!
     var bottomView: UIView
-    weak var zoomViewDelegate: ZoomViewDelegate?
+    weak var zoomViewDelegate: ZoomViewDelegate? {
+        didSet {
+            zoomViewDelegate?.fadeProgress(val: 1)
+        }
+    }
     
     var allowScroll: Bool = true {
         didSet {
@@ -51,13 +55,13 @@ class ZoomableView: UIScrollView, UIScrollViewDelegate {
                 contentTopToFrame.isActive = true
                 contentBottomToFrame.isActive = true
                 bottomView.isHidden = true
-                
             }
         }
     }
     
     var wasTracking = false
     var isAnimating = false
+    var isZoomHappening = false
     var lastInset: CGFloat = 0
     
     var index: Int
@@ -97,25 +101,30 @@ class ZoomableView: UIScrollView, UIScrollViewDelegate {
             v.bottomAnchor.constraint(equalTo: bottomAnchor),
             v.leadingAnchor.constraint(equalTo: frameLayoutGuide.leadingAnchor),
             v.trailingAnchor.constraint(equalTo: frameLayoutGuide.trailingAnchor),
-            v.heightAnchor.constraint(equalToConstant: 50)
+            v.heightAnchor.constraint(equalToConstant: 1)
         ])
         
-        addObserver(self, forKeyPath: "contentOffset", context: nil)
-    }
-    
-    override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey: Any]?, context: UnsafeMutableRawPointer?) {
-        guard let scrollView = object as? UIScrollView else { return }
-        updateState(scrollView)
-    }
-    
-    deinit {
-        removeObserver(self, forKeyPath: "contentOffset")
+        updateState()
     }
     
     required init?(coder: NSCoder) {
         index = 0
         bottomView = UIView()
         super.init(coder: coder)
+    }
+    
+    func scrollViewWillBeginZooming(_ scrollView: UIScrollView, with view: UIView?) {
+        isZoomHappening = true
+        updateState()
+    }
+    
+    func scrollViewDidEndZooming(_ scrollView: UIScrollView, with view: UIView?, atScale scale: CGFloat) {
+        isZoomHappening = false
+        updateState()
+    }
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        updateState()
     }
     
     func viewForZooming(in scrollView: UIScrollView) -> UIView? {
@@ -147,27 +156,27 @@ class ZoomableView: UIScrollView, UIScrollViewDelegate {
         contentInset = UIEdgeInsets(top: top, left: left, bottom: top, right: left)
     }
     
-    func updateState(_ scrollView: UIScrollView) {
+    func updateState() {
                 
-        allowScroll = scrollView.zoomScale == 1
+        allowScroll = zoomScale == 1
 
-        if scrollView.contentOffset.y > 10 && scrollView.zoomScale == 1 {
+        if contentOffset.y > 10 && zoomScale == 1 {
             allowScroll = true
 //                compresView(by: 0)
-            scrollView.pinchGestureRecognizer?.isEnabled = false
+            pinchGestureRecognizer?.isEnabled = false
         } else {
-            scrollView.pinchGestureRecognizer?.isEnabled = true
+            pinchGestureRecognizer?.isEnabled = true
         }
         
         if allowScroll {
-            let contentHeight = scrollView.contentSize.height
-            let scrollViewHeight = scrollView.bounds.size.height
-            let offset = scrollView.contentOffset.y
+            let contentHeight = contentSize.height
+            let scrollViewHeight = bounds.size.height
+            let offset = contentOffset.y
             let percentage = (offset / (contentHeight - scrollViewHeight)) * 100
             
             if !isAnimating {
                 if offset < 0 {
-                    let nrom = normalize(from: 0, to: scrollView.frame.size.height, by: abs(offset))
+                    let nrom = normalize(from: 0, to: frame.size.height, by: abs(offset))
                     let nrom2 = normalize(from: 0, to: 0.2, by: nrom)
                     zoomViewDelegate?.fadeProgress(val: 1 - nrom2)
                 } else {
@@ -175,7 +184,7 @@ class ZoomableView: UIScrollView, UIScrollViewDelegate {
                 }
             }
             
-            if percentage < 1, !isAnimating, (scrollView.isTracking || lastInset < 0) {
+            if percentage < 1, !isAnimating, (isTracking || lastInset < 0) {
 //                    let norm = normalize(from: 0, to: 20, by: abs(percentage))
 //                    let scale = CGFloat(1 - norm)
 //                    scrollView.alpha = scale
@@ -183,15 +192,15 @@ class ZoomableView: UIScrollView, UIScrollViewDelegate {
             }
             
         
-            if wasTracking, percentage < -10, !scrollView.isTracking {
+            if wasTracking, percentage < -10, !isTracking, !isZoomHappening {
                 isAnimating = true
-                let ogFram = scrollView.frame.origin
+                let ogFram = frame.origin
                 DispatchQueue.main.async {
                     withAnimation(.linear(duration: 0.2)) {
                         self.zoomViewDelegate?.fadeProgress(val: 0)
                     }
                     UIView.animate(withDuration: 0.2, animations: {
-                        scrollView.frame.origin = CGPoint(x: ogFram.x, y: scrollView.frame.size.height)
+                        self.frame.origin = CGPoint(x: ogFram.x, y: self.frame.size.height)
                     }) { _ in
                         self.zoomViewDelegate?.onDismiss()
                         
@@ -205,7 +214,7 @@ class ZoomableView: UIScrollView, UIScrollViewDelegate {
                 }
             }
         
-            wasTracking = scrollView.isTracking
+            wasTracking = isTracking
         }
     }
     
