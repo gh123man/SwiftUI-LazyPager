@@ -42,12 +42,15 @@ struct ContentView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(.red)
         .fullScreenCover(isPresented: $show) {
-            ZoomableScrollView(data: data2, index: 5, backgroundOpacity: $opa) { data in
+            ZoomableScrollView(data: data2, index: 5) { data in
                 Text("\(data)")
                     .font(.title)
 //                Image(data)
 //                    .resizable()
 //                    .aspectRatio(contentMode: .fit)
+            }
+            .onDismiss(backgroundOpacity: $opa) {
+                show = false
             }
             .background(.black.opacity(opa))
         }
@@ -60,6 +63,12 @@ struct ContentView_Previews: PreviewProvider {
     }
 }
 
+extension ZoomableScrollView {
+    func onDismiss(backgroundOpacity: Binding<CGFloat>? = nil, _ callback: @escaping () -> ()) -> some View {
+        return ZoomableScrollView(data: self.data, index: self.index, backgroundOpacity: backgroundOpacity, onDismiss: callback, content: self.viewLoader)
+    }
+}
+
 
 struct ZoomableScrollView<Content: View, DataType>: UIViewRepresentable {
     private var viewLoader: (DataType) -> Content
@@ -68,12 +77,14 @@ struct ZoomableScrollView<Content: View, DataType>: UIViewRepresentable {
     private var index: Int
     
     var backgroundOpacity: Binding<CGFloat>?
+    var dismissCallback: (() -> ())?
     
-    init(data: [DataType], index: Int, backgroundOpacity: Binding<CGFloat>? = nil, content: @escaping (DataType) -> Content) {
+    init(data: [DataType], index: Int, backgroundOpacity: Binding<CGFloat>? = nil, onDismiss: (() -> ())? = nil, content: @escaping (DataType) -> Content) {
         self.data = data
         self.index = index
         self.viewLoader = content
         self.backgroundOpacity = backgroundOpacity
+        self.dismissCallback = onDismiss
 //        self.bottomContent = bottomContent()
     }
 
@@ -86,11 +97,12 @@ struct ZoomableScrollView<Content: View, DataType>: UIViewRepresentable {
         return Coordinator(data: data,
                            startIndex: index,
                            backgroundOpacity: backgroundOpacity,
+                           dismissCallback: dismissCallback,
                            viewLoader: viewLoader)
     }
 
     func updateUIView(_ uiView: UIScrollView, context: Context) {
-        context.coordinator.goToPage(index)
+//        context.coordinator.goToPage(index)
     }
 
     // MARK: - Coordinator
@@ -100,6 +112,7 @@ struct ZoomableScrollView<Content: View, DataType>: UIViewRepresentable {
         
         var data: [DataType]
         var backgroundOpacity: Binding<CGFloat>?
+        var dismissCallback: (() -> ())?
         
         let preloadAmount = 1
         
@@ -121,11 +134,12 @@ struct ZoomableScrollView<Content: View, DataType>: UIViewRepresentable {
             }
         }
         
-        init(data: [DataType], startIndex: Int, backgroundOpacity: Binding<CGFloat>?, viewLoader: @escaping (DataType) -> Content) {
+        init(data: [DataType], startIndex: Int, backgroundOpacity: Binding<CGFloat>?, dismissCallback: (() -> ())?, viewLoader: @escaping (DataType) -> Content) {
             self.data = data
             self.viewLoader = viewLoader
             currentIndex = startIndex
             self.backgroundOpacity = backgroundOpacity
+            self.dismissCallback = dismissCallback
             super.init(frame: .zero)
             
             scrollView.showsVerticalScrollIndicator = false
@@ -329,7 +343,11 @@ struct ZoomableScrollView<Content: View, DataType>: UIViewRepresentable {
             backgroundOpacity?.wrappedValue = val
         }
         func onDismiss() {
-            
+            var transaction = Transaction()
+            transaction.disablesAnimations = true
+            withTransaction(transaction) {
+                dismissCallback?()
+            }
         }
     }
     
