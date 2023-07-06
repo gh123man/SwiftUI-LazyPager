@@ -8,6 +8,19 @@
 import SwiftUI
 
 
+
+struct BackgroundClearView: UIViewRepresentable {
+    func makeUIView(context: Context) -> UIView {
+        let view = UIView()
+        DispatchQueue.main.async {
+            view.superview?.superview?.backgroundColor = .clear
+        }
+        return view
+    }
+
+    func updateUIView(_ uiView: UIView, context: Context) {}
+}
+
 struct ContentView: View {
     
 //    @State var data = [
@@ -17,20 +30,27 @@ struct ContentView: View {
 //    ]
     
     @State var data2 = Array((0...20))
+    @State var show = false
+    @State var opa: CGFloat = 1
     var body: some View {
         
         VStack {
-            ZoomableScrollView(data: data2, index: 5) { data in
+            Button("Open") {
+                show.toggle()
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(.red)
+        .fullScreenCover(isPresented: $show) {
+            ZoomableScrollView(data: data2, index: 5, backgroundOpacity: $opa) { data in
                 Text("\(data)")
                     .font(.title)
 //                Image(data)
 //                    .resizable()
 //                    .aspectRatio(contentMode: .fit)
-            } bottomContent: {
-                Text("hi")
             }
+            .background(.black.opacity(opa))
         }
-        .background(.red)
     }
 }
 
@@ -41,17 +61,20 @@ struct ContentView_Previews: PreviewProvider {
 }
 
 
-struct ZoomableScrollView<Content: View, BottomContent: View, DataType>: UIViewRepresentable {
+struct ZoomableScrollView<Content: View, DataType>: UIViewRepresentable {
     private var viewLoader: (DataType) -> Content
-    private var bottomContent: BottomContent
+//    private var bottomContent: BottomContent
     private var data: [DataType]
     private var index: Int
     
-    init(data: [DataType], index: Int, content: @escaping (DataType) -> Content, @ViewBuilder bottomContent: () -> BottomContent) {
+    var backgroundOpacity: Binding<CGFloat>?
+    
+    init(data: [DataType], index: Int, backgroundOpacity: Binding<CGFloat>? = nil, content: @escaping (DataType) -> Content) {
         self.data = data
         self.index = index
         self.viewLoader = content
-        self.bottomContent = bottomContent()
+        self.backgroundOpacity = backgroundOpacity
+//        self.bottomContent = bottomContent()
     }
 
     func makeUIView(context: Context) -> UIScrollView {
@@ -62,23 +85,21 @@ struct ZoomableScrollView<Content: View, BottomContent: View, DataType>: UIViewR
     func makeCoordinator() -> Coordinator {
         return Coordinator(data: data,
                            startIndex: index,
-                           viewLoader: viewLoader,
-                           bottomController: UIHostingController(rootView: self.bottomContent))
+                           backgroundOpacity: backgroundOpacity,
+                           viewLoader: viewLoader)
     }
 
     func updateUIView(_ uiView: UIScrollView, context: Context) {
-        // set index here
         context.coordinator.goToPage(index)
-//        context.coordinator.hostingController.rootView = self.content
-//        assert(context.coordinator.hostingController.view.superview == uiView)
     }
 
     // MARK: - Coordinator
 
-    class Coordinator: UIScrollView, UIScrollViewDelegate {
+    class Coordinator: UIScrollView, UIScrollViewDelegate, ZoomViewDelegate {
         private var viewLoader: (DataType) -> Content
         
         var data: [DataType]
+        var backgroundOpacity: Binding<CGFloat>?
         
         let preloadAmount = 1
         
@@ -91,11 +112,6 @@ struct ZoomableScrollView<Content: View, BottomContent: View, DataType>: UIViewR
         var contentTopToContent: NSLayoutConstraint!
         var contentBottomToFrame: NSLayoutConstraint!
         
-        var allowScroll: Bool = true
-        var wasTracking = false
-        var isAnimating = false
-        var lastInset: CGFloat = 0
-        
         var isFirstLoad = false
 
         private var internalIndex: Int = 0
@@ -105,15 +121,16 @@ struct ZoomableScrollView<Content: View, BottomContent: View, DataType>: UIViewR
             }
         }
         
-        init(data: [DataType], startIndex: Int, viewLoader: @escaping (DataType) -> Content, bottomController: UIHostingController<BottomContent>) {
+        init(data: [DataType], startIndex: Int, backgroundOpacity: Binding<CGFloat>?, viewLoader: @escaping (DataType) -> Content) {
             self.data = data
             self.viewLoader = viewLoader
             currentIndex = startIndex
+            self.backgroundOpacity = backgroundOpacity
             super.init(frame: .zero)
             
             scrollView.showsVerticalScrollIndicator = false
             scrollView.showsHorizontalScrollIndicator = false
-            scrollView.backgroundColor = .gray
+            scrollView.backgroundColor = .clear
             scrollView.isPagingEnabled = true
             
             scrollView.layer.borderColor = CGColor.init(red: 0, green: 255, blue: 0, alpha: 1)
@@ -122,16 +139,10 @@ struct ZoomableScrollView<Content: View, BottomContent: View, DataType>: UIViewR
             scrollView.delegate = self
             computeViewState()
             
-            scrollView.addObserver(self, forKeyPath: "contentOffset", context: nil)
-        }
-        
-        override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey: Any]?, context: UnsafeMutableRawPointer?) {
-            guard let scrollView = object as? UIScrollView else { return }
-            updateState(scrollView)
-        }
-        
-        deinit {
-            scrollView.removeObserver(self, forKeyPath: "contentOffset")
+            DispatchQueue.main.async {
+                self.superview?.superview?.backgroundColor = .clear
+            }
+            
         }
         
         required init?(coder: NSCoder) {
@@ -221,6 +232,7 @@ struct ZoomableScrollView<Content: View, BottomContent: View, DataType>: UIViewR
         }
         
         func addSubview(_ zoomView: ZoomableView) {
+            zoomView.zoomViewDelegate = self
             scrollView.addSubview(zoomView)
             NSLayoutConstraint.activate([
                 zoomView.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor),
@@ -313,61 +325,15 @@ struct ZoomableScrollView<Content: View, BottomContent: View, DataType>: UIViewR
                 isFirstLoad = true
             }
         }
-        
-        func updateState(_ scrollView: UIScrollView) {
-                    
-            allowScroll = scrollView.zoomScale == 1
-
-            if scrollView.contentOffset.y > 10 && scrollView.zoomScale == 1 {
-                allowScroll = true
-//                compresView(by: 0)
-                scrollView.pinchGestureRecognizer?.isEnabled = false
-            } else {
-                scrollView.pinchGestureRecognizer?.isEnabled = true
-            }
-            
-            if allowScroll {
-                let contentHeight = scrollView.contentSize.height
-                let scrollViewHeight = scrollView.bounds.size.height
-                let offset = scrollView.contentOffset.y
-
-                let percentage = (offset / (contentHeight - scrollViewHeight)) * 100
-                
-                if percentage < 1, !isAnimating, (scrollView.isTracking || lastInset < 0) {
-//                    let norm = normalize(from: 0, to: 20, by: abs(percentage))
-//                    let scale = CGFloat(1 - norm)
-//                    scrollView.alpha = scale
-                    
-                    
-                    
-//                    compresView(by: percentage)
-                }
-                
-            
-                if wasTracking, percentage < -10, !scrollView.isTracking {
-                    isAnimating = true
-                    let ogFram = scrollView.frame.origin
-                    DispatchQueue.main.async {
-                        UIView.animate(withDuration: 0.3, animations: {
-                            
-                            scrollView.frame.origin = CGPoint(x: 0, y: scrollView.frame.size.height)
-                            scrollView.alpha = 0
-                        }) { _ in
-                            
-                            DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1)) {
-                                scrollView.frame.origin = ogFram
-                                scrollView.alpha = 1
-                                self.isAnimating = false
-                            }
-                        }
-                    }
-                }
-            
-                wasTracking = scrollView.isTracking
-            }
+        func fadeProgress(val: CGFloat) {
+            backgroundOpacity?.wrappedValue = val
         }
-        
+        func onDismiss() {
+            
+        }
     }
+    
+    
 }
 
 extension Collection {

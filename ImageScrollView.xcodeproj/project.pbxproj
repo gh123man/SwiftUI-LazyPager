@@ -97,10 +97,10 @@
 			isa = PBXGroup;
 			children = (
 				D353FB582A52174B00C04ABE /* ImageScrollViewApp.swift */,
+				D36779722A54E044005A98DF /* ZoomableView.swift */,
 				D353FB5A2A52174B00C04ABE /* ContentView.swift */,
 				D353FB5C2A52174C00C04ABE /* Assets.xcassets */,
 				D353FB5E2A52174C00C04ABE /* Preview Content */,
-				D36779722A54E044005A98DF /* ZoomableView.swift */,
 			);
 			path = ImageScrollView;
 			sourceTree = "<group>";
