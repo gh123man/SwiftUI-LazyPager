@@ -110,9 +110,7 @@ class ZoomableView: UIScrollView, UIScrollViewDelegate {
     }
     
     required init?(coder: NSCoder) {
-        index = 0
-        bottomView = UIView()
-        super.init(coder: coder)
+        fatalError("Not implemented")
     }
     
     func scrollViewWillBeginZooming(_ scrollView: UIScrollView, with view: UIView?) {
@@ -182,13 +180,11 @@ class ZoomableView: UIScrollView, UIScrollViewDelegate {
                 }
             }
             
-        
             wasTracking = isTracking
         }
     }
     
     func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
-        print(velocity)
         
         let offset = contentOffset.y
         let percentage = (offset / (contentSize.height - bounds.size.height)) * 100
