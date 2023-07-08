@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-
+import LazyPager
 
 
 struct BackgroundClearView: UIViewRepresentable {
@@ -45,7 +45,7 @@ struct ContentView: View {
         .background(.red)
         .fullScreenCover(isPresented: $show) {
             ZStack {
-                ZoomableScrollView(data: data, page: .constant(1)) { data in
+                LazyPager(data: data, page: .constant(1)) { data in
                     //                Text("\(data)")
                     //                    .font(.title)
                     Image(data)

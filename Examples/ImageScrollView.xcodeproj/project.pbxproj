@@ -14,8 +14,7 @@
 		D353FB6A2A52174C00C04ABE /* ImageScrollViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D353FB692A52174C00C04ABE /* ImageScrollViewTests.swift */; };
 		D353FB742A52174C00C04ABE /* ImageScrollViewUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D353FB732A52174C00C04ABE /* ImageScrollViewUITests.swift */; };
 		D353FB762A52174C00C04ABE /* ImageScrollViewUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D353FB752A52174C00C04ABE /* ImageScrollViewUITestsLaunchTests.swift */; };
-		D36779732A54E044005A98DF /* ZoomableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D36779722A54E044005A98DF /* ZoomableView.swift */; };
-		D3D8D3472A57A2F800FDE390 /* ZoomableScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D8D3462A57A2F800FDE390 /* ZoomableScrollView.swift */; };
+		D367DA132A59E930004497D4 /* LazyPager in Frameworks */ = {isa = PBXBuildFile; productRef = D367DA122A59E930004497D4 /* LazyPager */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -46,8 +45,7 @@
 		D353FB6F2A52174C00C04ABE /* ImageScrollViewUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ImageScrollViewUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D353FB732A52174C00C04ABE /* ImageScrollViewUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageScrollViewUITests.swift; sourceTree = "<group>"; };
 		D353FB752A52174C00C04ABE /* ImageScrollViewUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageScrollViewUITestsLaunchTests.swift; sourceTree = "<group>"; };
-		D36779722A54E044005A98DF /* ZoomableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoomableView.swift; sourceTree = "<group>"; };
-		D3D8D3462A57A2F800FDE390 /* ZoomableScrollView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ZoomableScrollView.swift; sourceTree = "<group>"; };
+		D367DA102A59E925004497D4 /* ImageScrollView */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = ImageScrollView; path = ..; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -55,6 +53,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D367DA132A59E930004497D4 /* LazyPager in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -78,10 +77,12 @@
 		D353FB4C2A52174B00C04ABE = {
 			isa = PBXGroup;
 			children = (
+				D367DA0F2A59E925004497D4 /* Packages */,
 				D353FB572A52174B00C04ABE /* ImageScrollView */,
 				D353FB682A52174C00C04ABE /* ImageScrollViewTests */,
 				D353FB722A52174C00C04ABE /* ImageScrollViewUITests */,
 				D353FB562A52174B00C04ABE /* Products */,
+				D367DA112A59E930004497D4 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -98,9 +99,7 @@
 		D353FB572A52174B00C04ABE /* ImageScrollView */ = {
 			isa = PBXGroup;
 			children = (
-				D3D8D3462A57A2F800FDE390 /* ZoomableScrollView.swift */,
 				D353FB582A52174B00C04ABE /* ImageScrollViewApp.swift */,
-				D36779722A54E044005A98DF /* ZoomableView.swift */,
 				D353FB5A2A52174B00C04ABE /* ContentView.swift */,
 				D353FB5C2A52174C00C04ABE /* Assets.xcassets */,
 				D353FB5E2A52174C00C04ABE /* Preview Content */,
@@ -133,6 +132,21 @@
 			path = ImageScrollViewUITests;
 			sourceTree = "<group>";
 		};
+		D367DA0F2A59E925004497D4 /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				D367DA102A59E925004497D4 /* ImageScrollView */,
+			);
+			name = Packages;
+			sourceTree = "<group>";
+		};
+		D367DA112A59E930004497D4 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -149,6 +163,9 @@
 			dependencies = (
 			);
 			name = ImageScrollView;
+			packageProductDependencies = (
+				D367DA122A59E930004497D4 /* LazyPager */,
+			);
 			productName = ImageScrollView;
 			productReference = D353FB552A52174B00C04ABE /* ImageScrollView.app */;
 			productType = "com.apple.product-type.application";
@@ -264,8 +281,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				D353FB5B2A52174B00C04ABE /* ContentView.swift in Sources */,
-				D36779732A54E044005A98DF /* ZoomableView.swift in Sources */,
-				D3D8D3472A57A2F800FDE390 /* ZoomableScrollView.swift in Sources */,
 				D353FB592A52174B00C04ABE /* ImageScrollViewApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -591,6 +606,13 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		D367DA122A59E930004497D4 /* LazyPager */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = LazyPager;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = D353FB4D2A52174B00C04ABE /* Project object */;
 }
