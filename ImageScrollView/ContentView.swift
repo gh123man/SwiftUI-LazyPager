@@ -44,19 +44,23 @@ struct ContentView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(.red)
         .fullScreenCover(isPresented: $show) {
-            ZoomableScrollView(data: data, index: 1) { data in
-//                Text("\(data)")
-//                    .font(.title)
-                Image(data)
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
+            ZStack {
+                ZoomableScrollView(data: data, page: .constant(1)) { data in
+                    //                Text("\(data)")
+                    //                    .font(.title)
+                    Image(data)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                }
+                .onDismiss(backgroundOpacity: $opa) {
+                    show = false
+                }
             }
-            .onDismiss(backgroundOpacity: $opa) {
-                show = false
-            }
+            .background(ClearFullScreenBackground())
             .onTapGesture {
                 print("tap")
             }
+//            .ignoresSafeArea()
             .background(.black.opacity(opa))
         }
     }

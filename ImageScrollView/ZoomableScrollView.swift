@@ -12,7 +12,7 @@ import SwiftUI
 extension ZoomableScrollView {
     func onDismiss(backgroundOpacity: Binding<CGFloat>? = nil, _ callback: @escaping () -> ()) -> ZoomableScrollView {
         return ZoomableScrollView(data: self.data,
-                                  index: self.index,
+                                  page: self.page,
                                   backgroundOpacity: backgroundOpacity,
                                   onDismiss: callback,
                                   content: self.viewLoader)
@@ -23,31 +23,33 @@ extension ZoomableScrollView {
 struct ZoomableScrollView<Content: View, DataType>: UIViewRepresentable {
     private var viewLoader: (DataType) -> Content
     private var data: [DataType]
-    private var index: Int
+    private var page: Binding<Int>
     
     var backgroundOpacity: Binding<CGFloat>?
     var dismissCallback: (() -> ())?
     
     init(data: [DataType],
-         index: Int,
+         page: Binding<Int>,
          backgroundOpacity: Binding<CGFloat>? = nil,
          onDismiss: (() -> ())? = nil,
          content: @escaping (DataType) -> Content) {
         self.data = data
-        self.index = index
+        self.page = page
         self.viewLoader = content
         self.backgroundOpacity = backgroundOpacity
         self.dismissCallback = onDismiss
     }
 
     func makeUIView(context: Context) -> UIScrollView {
-        context.coordinator.goToPage(index)
+        DispatchQueue.main.async {
+            context.coordinator.goToPage(page.wrappedValue)
+        }
         return context.coordinator.scrollView
     }
     
     func makeCoordinator() -> Coordinator {
         return Coordinator(data: data,
-                           startIndex: index,
+                           page: page,
                            backgroundOpacity: backgroundOpacity,
                            dismissCallback: dismissCallback,
                            viewLoader: viewLoader)
@@ -66,7 +68,7 @@ struct ZoomableScrollView<Content: View, DataType>: UIViewRepresentable {
         var backgroundOpacity: Binding<CGFloat>?
         var dismissCallback: (() -> ())?
         
-        let preloadAmount = 1
+        let preloadAmount = 3
         
         var scrollView: UIScrollView {
             return self
@@ -80,21 +82,24 @@ struct ZoomableScrollView<Content: View, DataType>: UIViewRepresentable {
         var isFirstLoad = false
 
         private var internalIndex: Int = 0
+        var page: Binding<Int>
         var currentIndex: Int = 0 {
             didSet {
                 computeViewState()
+                page.wrappedValue = currentIndex
             }
         }
         
         init(data: [DataType],
-             startIndex: Int,
+             page: Binding<Int>,
              backgroundOpacity: Binding<CGFloat>?,
              dismissCallback: (() -> ())?,
              viewLoader: @escaping (DataType) -> Content) {
             
             self.data = data
             self.viewLoader = viewLoader
-            self.currentIndex = startIndex
+            self.currentIndex = page.wrappedValue
+            self.page = page
             self.backgroundOpacity = backgroundOpacity
             self.dismissCallback = dismissCallback
             super.init(frame: .zero)
@@ -107,9 +112,9 @@ struct ZoomableScrollView<Content: View, DataType>: UIViewRepresentable {
             scrollView.delegate = self
             computeViewState()
             
-            DispatchQueue.main.async {
-                self.superview?.superview?.backgroundColor = .clear
-            }
+//            DispatchQueue.main.async {
+//                self.superview?.superview?.backgroundColor = .clear
+//            }
             
         }
         
@@ -270,7 +275,7 @@ struct ZoomableScrollView<Content: View, DataType>: UIViewRepresentable {
         func scrollViewDidScroll(_ scrollView: UIScrollView) {
             let visible = loadedViews.first { isSubviewVisible($0, in: scrollView) }
             let newIndex = loadedViews.firstIndex(where: { $0.index == visible?.index })!
-            if newIndex != internalIndex {
+            if newIndex != internalIndex, !isTracking {
                 currentIndex = visible!.index
                 internalIndex = newIndex
             }
@@ -330,4 +335,16 @@ extension Collection {
     subscript (safe index: Index) -> Element? {
         return indices.contains(index) ? self[index] : nil
     }
+}
+
+struct ClearFullScreenBackground: UIViewRepresentable {
+    func makeUIView(context: Context) -> UIView {
+        let view = UIView()
+        DispatchQueue.main.async {
+            view.superview?.superview?.backgroundColor = .clear
+        }
+        return view
+    }
+
+    func updateUIView(_ uiView: UIView, context: Context) {}
 }

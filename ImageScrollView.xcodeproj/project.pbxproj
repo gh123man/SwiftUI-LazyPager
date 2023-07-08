@@ -15,6 +15,7 @@
 		D353FB742A52174C00C04ABE /* ImageScrollViewUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D353FB732A52174C00C04ABE /* ImageScrollViewUITests.swift */; };
 		D353FB762A52174C00C04ABE /* ImageScrollViewUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D353FB752A52174C00C04ABE /* ImageScrollViewUITestsLaunchTests.swift */; };
 		D36779732A54E044005A98DF /* ZoomableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D36779722A54E044005A98DF /* ZoomableView.swift */; };
+		D3D8D3472A57A2F800FDE390 /* ZoomableScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D8D3462A57A2F800FDE390 /* ZoomableScrollView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -46,6 +47,7 @@
 		D353FB732A52174C00C04ABE /* ImageScrollViewUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageScrollViewUITests.swift; sourceTree = "<group>"; };
 		D353FB752A52174C00C04ABE /* ImageScrollViewUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageScrollViewUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		D36779722A54E044005A98DF /* ZoomableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoomableView.swift; sourceTree = "<group>"; };
+		D3D8D3462A57A2F800FDE390 /* ZoomableScrollView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ZoomableScrollView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -96,6 +98,7 @@
 		D353FB572A52174B00C04ABE /* ImageScrollView */ = {
 			isa = PBXGroup;
 			children = (
+				D3D8D3462A57A2F800FDE390 /* ZoomableScrollView.swift */,
 				D353FB582A52174B00C04ABE /* ImageScrollViewApp.swift */,
 				D36779722A54E044005A98DF /* ZoomableView.swift */,
 				D353FB5A2A52174B00C04ABE /* ContentView.swift */,
@@ -262,6 +265,7 @@
 			files = (
 				D353FB5B2A52174B00C04ABE /* ContentView.swift in Sources */,
 				D36779732A54E044005A98DF /* ZoomableView.swift in Sources */,
+				D3D8D3472A57A2F800FDE390 /* ZoomableScrollView.swift in Sources */,
 				D353FB592A52174B00C04ABE /* ImageScrollViewApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

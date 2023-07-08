@@ -36,6 +36,7 @@ class ZoomableView: UIScrollView, UIScrollViewDelegate {
     weak var zoomViewDelegate: ZoomViewDelegate? {
         didSet {
             zoomViewDelegate?.fadeProgress(val: 1)
+            self.updateState()
         }
     }
     
@@ -78,8 +79,10 @@ class ZoomableView: UIScrollView, UIScrollViewDelegate {
         minimumZoomScale = 1
         bouncesZoom = true
         backgroundColor = .clear
-        canCancelContentTouches = false
-        delaysContentTouches = false
+        alwaysBounceVertical = true
+        showsVerticalScrollIndicator = false
+        showsHorizontalScrollIndicator = false
+        contentInsetAdjustmentBehavior = .never
         addSubview(view)
         
         NSLayoutConstraint.activate([
@@ -93,7 +96,7 @@ class ZoomableView: UIScrollView, UIScrollViewDelegate {
         contentTopToContent = view.topAnchor.constraint(equalTo: topAnchor)
         contentBottomToFrame = view.bottomAnchor.constraint(equalTo: contentLayoutGuide.bottomAnchor)
         contentBottomToView = view.bottomAnchor.constraint(equalTo: v.topAnchor)
-
+        
         v.translatesAutoresizingMaskIntoConstraints = false
         addSubview(v)
 //        v.backgroundColor = .green
@@ -106,7 +109,18 @@ class ZoomableView: UIScrollView, UIScrollViewDelegate {
             v.heightAnchor.constraint(equalToConstant: 1)
         ])
         
-        updateState()
+        DispatchQueue.main.async {
+            self.updateState()
+        }
+    }
+    
+    override func safeAreaInsetsDidChange() {
+        super.safeAreaInsetsDidChange()
+//        contentTopToFrame.constant = safeAreaInsets.top
+//        contentTopToContent.constant = safeAreaInsets.top
+//        contentBottomToFrame.constant = safeAreaInsets.bottom
+//        contentBottomToView.constant = safeAreaInsets.bottom
+        print(safeAreaInsets)
     }
     
     required init?(coder: NSCoder) {
@@ -157,6 +171,15 @@ class ZoomableView: UIScrollView, UIScrollViewDelegate {
     }
     
     func updateState() {
+        
+        print(contentOffset)
+        
+        if let f = self.window?.safeAreaLayoutGuide.layoutFrame {
+            let topSafeAreaHeight = f.minY
+            let bottomSafeAreaHeight = window!.frame.maxY - f.maxY
+//            print(topSafeAreaHeight, bottomSafeAreaHeight, safeAreaInsets)
+//            safeAreaInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+        }
                 
         allowScroll = zoomScale == 1
 
@@ -189,7 +212,7 @@ class ZoomableView: UIScrollView, UIScrollViewDelegate {
         let offset = contentOffset.y
         let percentage = (offset / (contentSize.height - bounds.size.height)) * 100
         
-        if wasTracking, percentage < -10, !isZoomHappening, velocity.y < -2 {
+        if wasTracking, percentage < -10, !isZoomHappening, velocity.y < -1.3 {
             isAnimating = true
             let ogFram = frame.origin
             DispatchQueue.main.async {
