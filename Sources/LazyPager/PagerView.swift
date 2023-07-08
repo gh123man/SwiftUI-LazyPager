@@ -9,28 +9,20 @@ import Foundation
 import SwiftUI
 import UIKit
 
-public class PagerView<Content: View, DataType>: UIScrollView, ZoomViewDelegate, UIScrollViewDelegate {
-    private var viewLoader: (DataType) -> Content
-    
-    var data: [DataType]
-    var backgroundOpacity: Binding<CGFloat>?
-    var dismissCallback: (() -> ())?
-    
-    let preloadAmount = 3
-    
-    var scrollView: UIScrollView {
-        return self
-    }
-    var loadedViews = [ZoomableView]()
-    
-    var contentTopToFrame: NSLayoutConstraint!
-    var contentTopToContent: NSLayoutConstraint!
-    var contentBottomToFrame: NSLayoutConstraint!
-    
-    var isFirstLoad = false
+protocol ViewLoader: AnyObject {
+    func loadView(at: Int) -> ZoomableView?
+}
 
+class UIPagerView: UIScrollView {
+    var isFirstLoad = false
+    var loadedViews = [ZoomableView]()
+    let preloadAmount = 3
+    weak var viewLoader: ViewLoader?
+    weak var zoomViewDelegate: ZoomViewDelegate?
+    
     private var internalIndex: Int = 0
     var page: Binding<Int>
+    
     var currentIndex: Int = 0 {
         didSet {
             computeViewState()
@@ -38,40 +30,33 @@ public class PagerView<Content: View, DataType>: UIScrollView, ZoomViewDelegate,
         }
     }
     
-    init(data: [DataType],
-         page: Binding<Int>,
-         backgroundOpacity: Binding<CGFloat>?,
-         dismissCallback: (() -> ())?,
-         viewLoader: @escaping (DataType) -> Content) {
-        
-        self.data = data
-        self.viewLoader = viewLoader
+    init(page: Binding<Int>) {
         self.currentIndex = page.wrappedValue
         self.page = page
-        self.backgroundOpacity = backgroundOpacity
-        self.dismissCallback = dismissCallback
         super.init(frame: .zero)
         
-        scrollView.showsVerticalScrollIndicator = false
-        scrollView.showsHorizontalScrollIndicator = false
-        scrollView.backgroundColor = .clear
-        scrollView.isPagingEnabled = true
-        
-        scrollView.delegate = self
-        computeViewState()
+        delegate = self
     }
     
     required init?(coder: NSCoder) {
         fatalError("Not implemented")
     }
     
+    public override func layoutSubviews() {
+        super.layoutSubviews()
+        if !isFirstLoad {
+            goToPage(currentIndex)
+            isFirstLoad = true
+        }
+    }
+    
     func computeViewState() {
-        scrollView.delegate = nil
+        delegate = nil
         DispatchQueue.main.async {
-            self.scrollView.delegate = self
+            self.delegate = self
         }
         
-        if scrollView.subviews.isEmpty {
+        if subviews.isEmpty {
             for i in currentIndex...(currentIndex + preloadAmount) {
                 appendView(at: i)
             }
@@ -104,70 +89,24 @@ public class PagerView<Content: View, DataType>: UIScrollView, ZoomViewDelegate,
     }
     
     
-    func removeOutOfFrameViews() {
-        for view in loadedViews {
-            if abs(currentIndex - view.index) > preloadAmount {
-                remove(view: view)
-            }
-        }
-    }
-    
-    func remove(view: ZoomableView) {
-        let index = view.index
-        loadedViews.removeAll { $0.index == view.index }
-        view.removeFromSuperview()
-        
-        if let firstView = loadedViews.first {
-            firstView.leadingConstraint?.isActive = false
-            firstView.leadingConstraint = nil
-            firstView.leadingConstraint = firstView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor)
-            firstView.leadingConstraint?.isActive = true
-            
-            if firstView.index > index {
-                scrollView.contentOffset.x -= scrollView.frame.size.width
-                internalIndex -= 1
-            }
-        }
-        
-        if let lastView = loadedViews.last {
-            lastView.trailingConstraint?.isActive = false
-            lastView.trailingConstraint = nil
-            lastView.trailingConstraint = lastView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor)
-            lastView.trailingConstraint?.isActive = true
-        }
-    }
-    
-    func loadView(at index: Int) -> ZoomableView? {
-        guard let dta = data[safe: index] else {
-            return nil
-        }
-        
-        let loadedContent = UIHostingController(rootView: viewLoader(dta)).view!
-        
-        loadedContent.translatesAutoresizingMaskIntoConstraints = false
-        loadedContent.backgroundColor = .clear
-        
-        return ZoomableView(view: loadedContent, index: index)
-    }
-    
     func addSubview(_ zoomView: ZoomableView) {
-        zoomView.zoomViewDelegate = self
-        scrollView.addSubview(zoomView)
+        zoomView.zoomViewDelegate = zoomViewDelegate
+        super.addSubview(zoomView)
         NSLayoutConstraint.activate([
-            zoomView.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor),
-            zoomView.heightAnchor.constraint(equalTo: scrollView.frameLayoutGuide.heightAnchor),
+            zoomView.widthAnchor.constraint(equalTo: frameLayoutGuide.widthAnchor),
+            zoomView.heightAnchor.constraint(equalTo: frameLayoutGuide.heightAnchor),
         ])
     }
     
     func addFirstView(_ zoomView: ZoomableView) {
-        zoomView.leadingConstraint = zoomView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor)
-        zoomView.trailingConstraint = zoomView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor)
+        zoomView.leadingConstraint = zoomView.leadingAnchor.constraint(equalTo: leadingAnchor)
+        zoomView.trailingConstraint = zoomView.trailingAnchor.constraint(equalTo: trailingAnchor)
         zoomView.leadingConstraint?.isActive = true
         zoomView.trailingConstraint?.isActive = true
     }
     
     func appendView(at index: Int) {
-        guard let zoomView = loadView(at: index) else {
+        guard let zoomView = viewLoader?.loadView(at: index) else {
             return
         }
         
@@ -178,7 +117,7 @@ public class PagerView<Content: View, DataType>: UIScrollView, ZoomViewDelegate,
             lastView.trailingConstraint = nil
             
             zoomView.leadingConstraint = zoomView.leadingAnchor.constraint(equalTo: lastView.trailingAnchor)
-            zoomView.trailingConstraint = zoomView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor)
+            zoomView.trailingConstraint = zoomView.trailingAnchor.constraint(equalTo: trailingAnchor)
             zoomView.leadingConstraint?.isActive = true
             zoomView.trailingConstraint?.isActive = true
             
@@ -190,7 +129,7 @@ public class PagerView<Content: View, DataType>: UIScrollView, ZoomViewDelegate,
     }
     
     func prependView(at index: Int) {
-        guard let zoomView = loadView(at: index) else {
+        guard let zoomView = viewLoader?.loadView(at: index) else {
             return
         }
         
@@ -200,7 +139,7 @@ public class PagerView<Content: View, DataType>: UIScrollView, ZoomViewDelegate,
             firstView.leadingConstraint?.isActive = false
             firstView.leadingConstraint = nil
             
-            zoomView.leadingConstraint = zoomView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor)
+            zoomView.leadingConstraint = zoomView.leadingAnchor.constraint(equalTo: leadingAnchor)
             zoomView.trailingConstraint = zoomView.trailingAnchor.constraint(equalTo: firstView.leadingAnchor)
             zoomView.leadingConstraint?.isActive = true
             zoomView.trailingConstraint?.isActive = true
@@ -212,19 +151,43 @@ public class PagerView<Content: View, DataType>: UIScrollView, ZoomViewDelegate,
         layoutSubviews()
         
         loadedViews.insert(zoomView, at: 0)
-        scrollView.contentOffset.x += scrollView.frame.size.width
+        contentOffset.x += frame.size.width
         internalIndex += 1
         
     }
     
-    public func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        let visible = loadedViews.first { isSubviewVisible($0, in: scrollView) }
-        let newIndex = loadedViews.firstIndex(where: { $0.index == visible?.index })!
-        if newIndex != internalIndex, !isTracking {
-            currentIndex = visible!.index
-            internalIndex = newIndex
+    func remove(view: ZoomableView) {
+        let index = view.index
+        loadedViews.removeAll { $0.index == view.index }
+        view.removeFromSuperview()
+        
+        if let firstView = loadedViews.first {
+            firstView.leadingConstraint?.isActive = false
+            firstView.leadingConstraint = nil
+            firstView.leadingConstraint = firstView.leadingAnchor.constraint(equalTo: leadingAnchor)
+            firstView.leadingConstraint?.isActive = true
+            
+            if firstView.index > index {
+                contentOffset.x -= frame.size.width
+                internalIndex -= 1
+            }
         }
-        resizeOutOfBoundsViews()
+        
+        if let lastView = loadedViews.last {
+            lastView.trailingConstraint?.isActive = false
+            lastView.trailingConstraint = nil
+            lastView.trailingConstraint = lastView.trailingAnchor.constraint(equalTo: trailingAnchor)
+            lastView.trailingConstraint?.isActive = true
+        }
+    }
+    
+    
+    func removeOutOfFrameViews() {
+        for view in loadedViews {
+            if abs(currentIndex - view.index) > preloadAmount {
+                remove(view: view)
+            }
+        }
     }
     
     func resizeOutOfBoundsViews() {
@@ -246,17 +209,72 @@ public class PagerView<Content: View, DataType>: UIScrollView, ZoomViewDelegate,
         guard let index = loadedViews.firstIndex(where: { $0.index == page }) else {
             return
         }
-        scrollView.contentOffset.x = CGFloat(index) * scrollView.frame.size.width
+        contentOffset.x = CGFloat(index) * frame.size.width
         internalIndex = index
     }
+}
+
+extension UIPagerView: UIScrollViewDelegate {
     
-    public override func layoutSubviews() {
-        super.layoutSubviews()
-        if !isFirstLoad {
-            goToPage(currentIndex)
-            isFirstLoad = true
+    public func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let visible = loadedViews.first { isSubviewVisible($0, in: scrollView) }
+        let newIndex = loadedViews.firstIndex(where: { $0.index == visible?.index })!
+        if newIndex != internalIndex, !scrollView.isTracking {
+            currentIndex = visible!.index
+            internalIndex = newIndex
         }
+        resizeOutOfBoundsViews()
     }
+    
+    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        resizeOutOfBoundsViews()
+    }
+}
+
+public class PagerView<Content: View, DataType> {
+    private var viewLoader: (DataType) -> Content
+    
+    var data: [DataType]
+    var backgroundOpacity: Binding<CGFloat>?
+    var dismissCallback: (() -> ())?
+    
+    
+    var scrollView: UIPagerView
+    
+    
+    var contentTopToFrame: NSLayoutConstraint!
+    var contentTopToContent: NSLayoutConstraint!
+    var contentBottomToFrame: NSLayoutConstraint!
+    
+    
+    init(data: [DataType],
+         page: Binding<Int>,
+         backgroundOpacity: Binding<CGFloat>?,
+         dismissCallback: (() -> ())?,
+         viewLoader: @escaping (DataType) -> Content) {
+        
+        self.data = data
+        self.viewLoader = viewLoader
+        self.scrollView = UIPagerView(page: page)
+        self.scrollView.viewLoader = self
+        self.scrollView.zoomViewDelegate = self
+        self.backgroundOpacity = backgroundOpacity
+        self.dismissCallback = dismissCallback
+        
+        scrollView.showsVerticalScrollIndicator = false
+        scrollView.showsHorizontalScrollIndicator = false
+        scrollView.backgroundColor = .clear
+        scrollView.isPagingEnabled = true
+        
+        scrollView.computeViewState()
+    }
+    
+    func goToPage(_ page: Int) {
+        scrollView.goToPage(page)
+    }
+}
+
+extension PagerView: ZoomViewDelegate {
     func fadeProgress(val: CGFloat) {
         backgroundOpacity?.wrappedValue = val
     }
@@ -268,8 +286,19 @@ public class PagerView<Content: View, DataType>: UIScrollView, ZoomViewDelegate,
             dismissCallback?()
         }
     }
-    
-    public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-        resizeOutOfBoundsViews()
+}
+
+extension PagerView: ViewLoader {
+    func loadView(at index: Int) -> ZoomableView? {
+        guard let dta = data[safe: index] else {
+            return nil
+        }
+        
+        let loadedContent = UIHostingController(rootView: viewLoader(dta)).view!
+        
+        loadedContent.translatesAutoresizingMaskIntoConstraints = false
+        loadedContent.backgroundColor = .clear
+        
+        return ZoomableView(view: loadedContent, index: index)
     }
 }

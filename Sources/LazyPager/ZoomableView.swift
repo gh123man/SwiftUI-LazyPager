@@ -114,15 +114,6 @@ class ZoomableView: UIScrollView, UIScrollViewDelegate {
         }
     }
     
-    override func safeAreaInsetsDidChange() {
-        super.safeAreaInsetsDidChange()
-//        contentTopToFrame.constant = safeAreaInsets.top
-//        contentTopToContent.constant = safeAreaInsets.top
-//        contentBottomToFrame.constant = safeAreaInsets.bottom
-//        contentBottomToView.constant = safeAreaInsets.bottom
-        print(safeAreaInsets)
-    }
-    
     required init?(coder: NSCoder) {
         fatalError("Not implemented")
     }
@@ -172,15 +163,6 @@ class ZoomableView: UIScrollView, UIScrollViewDelegate {
     
     func updateState() {
         
-        print(contentOffset)
-        
-        if let f = self.window?.safeAreaLayoutGuide.layoutFrame {
-            let topSafeAreaHeight = f.minY
-            let bottomSafeAreaHeight = window!.frame.maxY - f.maxY
-//            print(topSafeAreaHeight, bottomSafeAreaHeight, safeAreaInsets)
-//            safeAreaInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
-        }
-                
         allowScroll = zoomScale == 1
 
         if contentOffset.y > 10 && zoomScale == 1 {
