@@ -14,15 +14,6 @@ protocol ZoomViewDelegate: AnyObject {
     func onDismiss()
 }
 
-func lerp(from: CGFloat, to: CGFloat, by: CGFloat) -> CGFloat {
-    return from * (1 - by) + to * by
-}
-
-func normalize(from min: CGFloat, to max: CGFloat, by val: CGFloat) -> CGFloat {
-    let v = (val - min) / (max - min)
-    return v < 0 ? 0 : v > 1 ? 1 : v
-}
-
 class ZoomableView: UIScrollView, UIScrollViewDelegate {
     
     var trailingConstraint: NSLayoutConstraint?
@@ -177,8 +168,8 @@ class ZoomableView: UIScrollView, UIScrollViewDelegate {
             
             if !isAnimating {
                 if offset < 0 {
-                    let nrom = normalize(from: 0, to: frame.size.height, by: abs(offset))
-                    let nrom2 = normalize(from: 0, to: 0.2, by: nrom)
+                    let nrom = normalize(from: 0, at: abs(offset), to: frame.size.height)
+                    let nrom2 = normalize(from: 0, at: nrom, to: 0.2)
                     zoomViewDelegate?.fadeProgress(val: 1 - nrom2)
                 } else {
                     zoomViewDelegate?.fadeProgress(val: 1)

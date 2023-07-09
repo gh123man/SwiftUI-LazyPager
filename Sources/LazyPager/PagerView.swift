@@ -6,14 +6,14 @@
 //
 
 import Foundation
-import SwiftUI
 import UIKit
+import SwiftUI
 
 protocol ViewLoader: AnyObject {
     func loadView(at: Int) -> ZoomableView?
 }
 
-class UIPagerView: UIScrollView {
+class PagerView: UIScrollView {
     var isFirstLoad = false
     var loadedViews = [ZoomableView]()
     let preloadAmount = 3
@@ -35,6 +35,10 @@ class UIPagerView: UIScrollView {
         self.page = page
         super.init(frame: .zero)
         
+        showsVerticalScrollIndicator = false
+        showsHorizontalScrollIndicator = false
+        backgroundColor = .clear
+        isPagingEnabled = true
         delegate = self
     }
     
@@ -214,7 +218,7 @@ class UIPagerView: UIScrollView {
     }
 }
 
-extension UIPagerView: UIScrollViewDelegate {
+extension PagerView: UIScrollViewDelegate {
     
     public func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let visible = loadedViews.first { isSubviewVisible($0, in: scrollView) }
@@ -228,77 +232,5 @@ extension UIPagerView: UIScrollViewDelegate {
     
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         resizeOutOfBoundsViews()
-    }
-}
-
-public class PagerView<Content: View, DataType> {
-    private var viewLoader: (DataType) -> Content
-    
-    var data: [DataType]
-    var backgroundOpacity: Binding<CGFloat>?
-    var dismissCallback: (() -> ())?
-    
-    
-    var scrollView: UIPagerView
-    
-    
-    var contentTopToFrame: NSLayoutConstraint!
-    var contentTopToContent: NSLayoutConstraint!
-    var contentBottomToFrame: NSLayoutConstraint!
-    
-    
-    init(data: [DataType],
-         page: Binding<Int>,
-         backgroundOpacity: Binding<CGFloat>?,
-         dismissCallback: (() -> ())?,
-         viewLoader: @escaping (DataType) -> Content) {
-        
-        self.data = data
-        self.viewLoader = viewLoader
-        self.scrollView = UIPagerView(page: page)
-        self.scrollView.viewLoader = self
-        self.scrollView.zoomViewDelegate = self
-        self.backgroundOpacity = backgroundOpacity
-        self.dismissCallback = dismissCallback
-        
-        scrollView.showsVerticalScrollIndicator = false
-        scrollView.showsHorizontalScrollIndicator = false
-        scrollView.backgroundColor = .clear
-        scrollView.isPagingEnabled = true
-        
-        scrollView.computeViewState()
-    }
-    
-    func goToPage(_ page: Int) {
-        scrollView.goToPage(page)
-    }
-}
-
-extension PagerView: ZoomViewDelegate {
-    func fadeProgress(val: CGFloat) {
-        backgroundOpacity?.wrappedValue = val
-    }
-    func onDismiss() {
-        // Cancel swiftUI dismiss animations
-        var transaction = Transaction()
-        transaction.disablesAnimations = true
-        withTransaction(transaction) {
-            dismissCallback?()
-        }
-    }
-}
-
-extension PagerView: ViewLoader {
-    func loadView(at index: Int) -> ZoomableView? {
-        guard let dta = data[safe: index] else {
-            return nil
-        }
-        
-        let loadedContent = UIHostingController(rootView: viewLoader(dta)).view!
-        
-        loadedContent.translatesAutoresizingMaskIntoConstraints = false
-        loadedContent.backgroundColor = .clear
-        
-        return ZoomableView(view: loadedContent, index: index)
     }
 }

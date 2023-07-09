@@ -9,13 +9,31 @@ import Foundation
 import UIKit
 import SwiftUI
 
+public struct LazyPager<Content: View, DataType> {
+    private var viewLoader: (DataType) -> Content
+    private var data: [DataType]
+    private var page: Binding<Int>
+    
+    var backgroundOpacity: Binding<CGFloat>?
+    var dismissCallback: (() -> ())?
+    
+    public init(data: [DataType],
+         page: Binding<Int>,
+         content: @escaping (DataType) -> Content) {
+        self.data = data
+        self.page = page
+        self.viewLoader = content
+    }
+
+    public class Coordinator: ViewDataProvider<Content, DataType> { }
+}
+
 public extension LazyPager {
     func onDismiss(backgroundOpacity: Binding<CGFloat>? = nil, _ callback: @escaping () -> ()) -> LazyPager {
-        return LazyPager(data: self.data,
-                                  page: self.page,
-                                  backgroundOpacity: backgroundOpacity,
-                                  onDismiss: callback,
-                                  content: self.viewLoader)
+        var this = self
+        this.backgroundOpacity = backgroundOpacity
+        this.dismissCallback = callback
+        return this
     }
 }
 
@@ -36,28 +54,4 @@ extension LazyPager: UIViewRepresentable {
     }
 
     public func updateUIView(_ uiView: UIScrollView, context: Context) {}
-}
-
-
-public struct LazyPager<Content: View, DataType> {
-    private var viewLoader: (DataType) -> Content
-    private var data: [DataType]
-    private var page: Binding<Int>
-    
-    var backgroundOpacity: Binding<CGFloat>?
-    var dismissCallback: (() -> ())?
-    
-    public init(data: [DataType],
-         page: Binding<Int>,
-         backgroundOpacity: Binding<CGFloat>? = nil,
-         onDismiss: (() -> ())? = nil,
-         content: @escaping (DataType) -> Content) {
-        self.data = data
-        self.page = page
-        self.viewLoader = content
-        self.backgroundOpacity = backgroundOpacity
-        self.dismissCallback = onDismiss
-    }
-
-    public class Coordinator: PagerView<Content, DataType> { }
 }

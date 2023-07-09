@@ -24,6 +24,9 @@ struct BackgroundClearView: UIViewRepresentable {
 struct ContentView: View {
     
     @State var data = [
+        "a",
+        "b",
+        "c",
         "winter1",
         "winter8",
         "birthday2",
@@ -37,8 +40,10 @@ struct ContentView: View {
     var body: some View {
         
         VStack {
-            Button("Open") {
-                show.toggle()
+            VStack {
+                Button("Open") {
+                    show.toggle()
+                }
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -46,6 +51,9 @@ struct ContentView: View {
         .fullScreenCover(isPresented: $show) {
             ZStack {
                 LazyPager(data: data, page: .constant(1)) { data in
+//                    Text("Foo")
+//                        .frame(width: 500, height: 200)
+//                        .background(.green)
                     //                Text("\(data)")
                     //                    .font(.title)
                     Image(data)
@@ -60,7 +68,7 @@ struct ContentView: View {
             .onTapGesture {
                 print("tap")
             }
-//            .ignoresSafeArea()
+            .ignoresSafeArea()
             .background(.black.opacity(opa))
         }
     }
