@@ -14,9 +14,10 @@ public class ViewDataProvider<Content: View, DataType> {
     
     var data: [DataType]
     var backgroundOpacity: Binding<CGFloat>?
-    var dismissCallback: (() -> ())?
-    var tapCallback: (() -> ())?
+    var config: Config
+    
     var scrollView: PagerView
+    
     var contentTopToFrame: NSLayoutConstraint!
     var contentTopToContent: NSLayoutConstraint!
     var contentBottomToFrame: NSLayoutConstraint!
@@ -24,19 +25,18 @@ public class ViewDataProvider<Content: View, DataType> {
     
     init(data: [DataType],
          page: Binding<Int>,
+         config: Config,
          backgroundOpacity: Binding<CGFloat>?,
-         dismissCallback: (() -> ())?,
-         tapCallback: (() -> ())?,
          viewLoader: @escaping (DataType) -> Content) {
         
         self.data = data
         self.viewLoader = viewLoader
-        self.scrollView = PagerView(page: page)
+        self.config = config
+        self.scrollView = PagerView(page: page, config: config)
         self.scrollView.viewLoader = self
         self.scrollView.zoomViewDelegate = self
+        
         self.backgroundOpacity = backgroundOpacity
-        self.dismissCallback = dismissCallback
-        self.tapCallback = tapCallback
         
         scrollView.computeViewState()
     }
@@ -49,19 +49,6 @@ public class ViewDataProvider<Content: View, DataType> {
 extension ViewDataProvider: ZoomViewDelegate {
     func fadeProgress(val: CGFloat) {
         backgroundOpacity?.wrappedValue = val
-    }
-    
-    func didTap() {
-        tapCallback?()
-    }
-    
-    func onDismiss() {
-        // Cancel swiftUI dismiss animations
-        var transaction = Transaction()
-        transaction.disablesAnimations = true
-        withTransaction(transaction) {
-            dismissCallback?()
-        }
     }
 }
 
@@ -76,6 +63,6 @@ extension ViewDataProvider: ViewLoader {
         loadedContent.translatesAutoresizingMaskIntoConstraints = false
         loadedContent.backgroundColor = .clear
         
-        return ZoomableView(view: loadedContent, index: index)
+        return ZoomableView(view: loadedContent, index: index, config: config)
     }
 }

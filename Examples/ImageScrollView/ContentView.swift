@@ -60,6 +60,7 @@ struct ContentView: View {
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                 }
+                .zoomable(min: 1, max: 5)
                 .onDismiss(backgroundOpacity: $opa) {
                     show = false
                 }

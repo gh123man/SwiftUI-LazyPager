@@ -17,6 +17,7 @@ class PagerView: UIScrollView {
     var isFirstLoad = false
     var loadedViews = [ZoomableView]()
     let preloadAmount = 3
+    var config: Config
     weak var viewLoader: ViewLoader?
     weak var zoomViewDelegate: ZoomViewDelegate?
     
@@ -30,9 +31,10 @@ class PagerView: UIScrollView {
         }
     }
     
-    init(page: Binding<Int>) {
+    init(page: Binding<Int>, config: Config) {
         self.currentIndex = page.wrappedValue
         self.page = page
+        self.config = config
         super.init(frame: .zero)
         
         showsVerticalScrollIndicator = false
