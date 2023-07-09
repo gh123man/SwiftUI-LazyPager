@@ -173,7 +173,10 @@ class ZoomableView: UIScrollView, UIScrollViewDelegate {
                          ? (newHeight - imageView.frame.height)
                          : (scrollView.frame.height - imageView.frame.height))
 
-        contentInset = UIEdgeInsets(top: top - safeAreaInsets.top, left: left, bottom: top - safeAreaInsets.bottom, right: left)
+        if zoomScale <= maximumZoomScale {
+            contentInset = UIEdgeInsets(top: top - safeAreaInsets.top, left: left, bottom: top - safeAreaInsets.bottom, right: left)
+        }
+        
     }
     
     func updateState() {
