@@ -15,6 +15,7 @@ public class ViewDataProvider<Content: View, DataType> {
     var data: [DataType]
     var backgroundOpacity: Binding<CGFloat>?
     var dismissCallback: (() -> ())?
+    var tapCallback: (() -> ())?
     var scrollView: PagerView
     var contentTopToFrame: NSLayoutConstraint!
     var contentTopToContent: NSLayoutConstraint!
@@ -25,6 +26,7 @@ public class ViewDataProvider<Content: View, DataType> {
          page: Binding<Int>,
          backgroundOpacity: Binding<CGFloat>?,
          dismissCallback: (() -> ())?,
+         tapCallback: (() -> ())?,
          viewLoader: @escaping (DataType) -> Content) {
         
         self.data = data
@@ -34,6 +36,7 @@ public class ViewDataProvider<Content: View, DataType> {
         self.scrollView.zoomViewDelegate = self
         self.backgroundOpacity = backgroundOpacity
         self.dismissCallback = dismissCallback
+        self.tapCallback = tapCallback
         
         scrollView.computeViewState()
     }
@@ -47,6 +50,11 @@ extension ViewDataProvider: ZoomViewDelegate {
     func fadeProgress(val: CGFloat) {
         backgroundOpacity?.wrappedValue = val
     }
+    
+    func didTap() {
+        tapCallback?()
+    }
+    
     func onDismiss() {
         // Cancel swiftUI dismiss animations
         var transaction = Transaction()

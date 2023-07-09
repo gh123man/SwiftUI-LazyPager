@@ -16,6 +16,7 @@ public struct LazyPager<Content: View, DataType> {
     
     var backgroundOpacity: Binding<CGFloat>?
     var dismissCallback: (() -> ())?
+    var tapCallback: (() -> ())?
     
     public init(data: [DataType],
          page: Binding<Int>,
@@ -35,6 +36,12 @@ public extension LazyPager {
         this.dismissCallback = callback
         return this
     }
+    
+    func onTap(_ callback: @escaping () -> ()) -> LazyPager {
+        var this = self
+        this.tapCallback = callback
+        return this
+    }
 }
 
 extension LazyPager: UIViewRepresentable {
@@ -50,6 +57,7 @@ extension LazyPager: UIViewRepresentable {
                            page: page,
                            backgroundOpacity: backgroundOpacity,
                            dismissCallback: dismissCallback,
+                           tapCallback: tapCallback,
                            viewLoader: viewLoader)
     }
 

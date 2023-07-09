@@ -11,6 +11,7 @@ import SwiftUI
 
 protocol ZoomViewDelegate: AnyObject {
     func fadeProgress(val: CGFloat)
+    func didTap()
     func onDismiss()
 }
 
@@ -55,10 +56,12 @@ class ZoomableView: UIScrollView, UIScrollViewDelegate {
     var isAnimating = false
     var isZoomHappening = false
     var lastInset: CGFloat = 0
+    var view: UIView
     
     var index: Int
     init(view: UIView, index: Int) {
         self.index = index
+        self.view = view
         let v = UIView()
         bottomView = v
         
@@ -98,6 +101,18 @@ class ZoomableView: UIScrollView, UIScrollViewDelegate {
             v.heightAnchor.constraint(equalToConstant: 1)
         ])
         
+        let singleTapGesture = UITapGestureRecognizer(target: self, action: #selector(singleTap(_:)))
+        singleTapGesture.numberOfTapsRequired = 1
+        singleTapGesture.numberOfTouchesRequired = 1
+        addGestureRecognizer(singleTapGesture)
+        
+        let doubleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(doubleTap(_:)))
+        doubleTapRecognizer.numberOfTapsRequired = 2
+        doubleTapRecognizer.numberOfTouchesRequired = 1
+        addGestureRecognizer(doubleTapRecognizer)
+        
+        singleTapGesture.require(toFail: doubleTapRecognizer)
+        
         DispatchQueue.main.async {
             self.updateState()
         }
@@ -106,6 +121,17 @@ class ZoomableView: UIScrollView, UIScrollViewDelegate {
     required init?(coder: NSCoder) {
         fatalError("Not implemented")
     }
+    
+    @objc func singleTap(_ recognizer: UITapGestureRecognizer) {
+        zoomViewDelegate?.didTap()
+    }
+    
+    @objc func doubleTap(_ recognizer:UITapGestureRecognizer) {
+        let pointInView = recognizer.location(in: view)
+        zoomInOrOut(at: pointInView)
+    }
+    
+    
     
     func scrollViewWillBeginZooming(_ scrollView: UIScrollView, with view: UIView?) {
         isZoomHappening = true
@@ -126,7 +152,7 @@ class ZoomableView: UIScrollView, UIScrollViewDelegate {
     }
     
     func scrollViewDidZoom(_ scrollView: UIScrollView) {
-        let imageView = scrollView.subviews[0]
+        let imageView = view
         
         let w: CGFloat = imageView.intrinsicContentSize.width * UIScreen.main.scale
         let h: CGFloat = imageView.intrinsicContentSize.height * UIScreen.main.scale
@@ -200,6 +226,17 @@ class ZoomableView: UIScrollView, UIScrollViewDelegate {
                 }
             }
         }
+    }
+    
+    func zoomInOrOut(at point:CGPoint) {
+        let newZoomScale = zoomScale == minimumZoomScale ? (maximumZoomScale / 3) : minimumZoomScale
+        let size = bounds.size
+        let w = size.width / newZoomScale
+        let h = size.height / newZoomScale
+        let x = point.x - (w * 0.5)
+        let y = point.y - (h * 0.5)
+        let rect = CGRect(x: x, y: y, width: w, height: h)
+        zoom(to: rect, animated: true)
     }
 }
 

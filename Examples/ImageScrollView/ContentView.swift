@@ -63,11 +63,11 @@ struct ContentView: View {
                 .onDismiss(backgroundOpacity: $opa) {
                     show = false
                 }
+                .onTap {
+                    print("tap")
+                }
             }
             .background(ClearFullScreenBackground())
-            .onTapGesture {
-                print("tap")
-            }
             .ignoresSafeArea()
             .background(.black.opacity(opa))
         }
