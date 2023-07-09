@@ -15,22 +15,20 @@ public enum DoubleTap {
 }
 
 public struct Config {
-    var backgroundOpacity: Binding<CGFloat>?
-    var minZoom: CGFloat = 1
-    var maxZoom: CGFloat = 1
-    var doubleTapSetting: DoubleTap = .disabled
-    var dismissCallback: (() -> ())?
-    var tapCallback: (() -> ())?
+    public var backgroundOpacity: Binding<CGFloat>?
+    public var minZoom: CGFloat = 1
+    public var maxZoom: CGFloat = 1
+    public var doubleTapSetting: DoubleTap = .disabled
+    public var dismissCallback: (() -> ())?
+    public var tapCallback: (() -> ())?
     
-    var preloadAmount: Int = 3
-    var dismissVelocity: CGFloat = 1.3
-    var dismissAnimationLength: CGFloat = 0.2
-    var dismissTriggerOffset: CGFloat = 0.1
-    var shouldCacnelSwiftUIAnimationsOnDismiss = true
-    var fullFadeOnDragAt: CGFloat = 0.2
+    public var preloadAmount: Int = 3
+    public var dismissVelocity: CGFloat = 1.3
+    public var dismissAnimationLength: CGFloat = 0.2
+    public var dismissTriggerOffset: CGFloat = 0.1
+    public var shouldCacnelSwiftUIAnimationsOnDismiss = true
+    public var fullFadeOnDragAt: CGFloat = 0.2
 }
-
-
 
 public struct LazyPager<Content: View, DataType> {
     private var viewLoader: (DataType) -> Content
@@ -72,9 +70,9 @@ public extension LazyPager {
         return this
     }
     
-    func settings(_ adjust: @escaping (Config) -> Config) -> LazyPager {
+    func settings(_ adjust: @escaping (inout Config) -> ()) -> LazyPager {
         var this = self
-        this.config = adjust(this.config)
+        adjust(&this.config)
         return this
     }
 }

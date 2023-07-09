@@ -8,35 +8,20 @@
 import SwiftUI
 import LazyPager
 
-
-struct BackgroundClearView: UIViewRepresentable {
-    func makeUIView(context: Context) -> UIView {
-        let view = UIView()
-        DispatchQueue.main.async {
-            view.superview?.superview?.backgroundColor = .clear
-        }
-        return view
-    }
-
-    func updateUIView(_ uiView: UIView, context: Context) {}
-}
-
 struct ContentView: View {
     
     @State var data = [
-        "a",
-        "b",
-        "c",
-        "winter1",
-        "winter8",
-        "birthday2",
-        "winter1",
-        "winter8",
+        "nora1",
+        "nora2",
+        "nora3",
+        "nora4",
+        "nora5",
+        "nora6",
     ]
     
-    @State var data2 = Array((0...20))
     @State var show = true
-    @State var opa: CGFloat = 1
+    @State var opacity: CGFloat = 1
+    @State var index = 0
     var body: some View {
         
         VStack {
@@ -46,22 +31,15 @@ struct ContentView: View {
                 }
             }
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(.red)
         .fullScreenCover(isPresented: $show) {
             ZStack {
-                LazyPager(data: data, page: .constant(1)) { data in
-//                    Text("Foo")
-//                        .frame(width: 500, height: 200)
-//                        .background(.green)
-                    //                Text("\(data)")
-                    //                    .font(.title)
+                LazyPager(data: data, page: $index) { data in
                     Image(data)
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                 }
                 .zoomable(min: 1, max: 5)
-                .onDismiss(backgroundOpacity: $opa) {
+                .onDismiss(backgroundOpacity: $opacity) {
                     show = false
                 }
                 .onTap {
@@ -70,7 +48,7 @@ struct ContentView: View {
             }
             .background(ClearFullScreenBackground())
             .ignoresSafeArea()
-            .background(.black.opacity(opa))
+            .background(.black.opacity(opacity))
         }
     }
 }
