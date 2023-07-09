@@ -13,7 +13,6 @@ public class ViewDataProvider<Content: View, DataType> {
     private var viewLoader: (DataType) -> Content
     
     var data: [DataType]
-    var backgroundOpacity: Binding<CGFloat>?
     var config: Config
     
     var scrollView: PagerView
@@ -26,7 +25,6 @@ public class ViewDataProvider<Content: View, DataType> {
     init(data: [DataType],
          page: Binding<Int>,
          config: Config,
-         backgroundOpacity: Binding<CGFloat>?,
          viewLoader: @escaping (DataType) -> Content) {
         
         self.data = data
@@ -34,21 +32,12 @@ public class ViewDataProvider<Content: View, DataType> {
         self.config = config
         self.scrollView = PagerView(page: page, config: config)
         self.scrollView.viewLoader = self
-        self.scrollView.zoomViewDelegate = self
-        
-        self.backgroundOpacity = backgroundOpacity
         
         scrollView.computeViewState()
     }
     
     func goToPage(_ page: Int) {
         scrollView.goToPage(page)
-    }
-}
-
-extension ViewDataProvider: ZoomViewDelegate {
-    func fadeProgress(val: CGFloat) {
-        backgroundOpacity?.wrappedValue = val
     }
 }
 

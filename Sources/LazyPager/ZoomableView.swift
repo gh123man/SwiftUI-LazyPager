@@ -9,10 +9,6 @@ import Foundation
 import UIKit
 import SwiftUI
 
-protocol ZoomViewDelegate: AnyObject {
-    func fadeProgress(val: CGFloat)
-}
-
 class ZoomableView: UIScrollView, UIScrollViewDelegate {
     
     var trailingConstraint: NSLayoutConstraint?
@@ -25,13 +21,6 @@ class ZoomableView: UIScrollView, UIScrollViewDelegate {
     
     var config: Config
     var bottomView: UIView
-    weak var zoomViewDelegate: ZoomViewDelegate? {
-        didSet {
-            zoomViewDelegate?.fadeProgress(val: 1)
-            self.updateState()
-        }
-    }
-    
     var allowScroll: Bool = true {
         didSet {
             if allowScroll {
@@ -164,26 +153,25 @@ class ZoomableView: UIScrollView, UIScrollViewDelegate {
     }
     
     func scrollViewDidZoom(_ scrollView: UIScrollView) {
-        let imageView = view
         
-        let w: CGFloat = imageView.intrinsicContentSize.width * UIScreen.main.scale
-        let h: CGFloat = imageView.intrinsicContentSize.height * UIScreen.main.scale
+        let w: CGFloat = view.intrinsicContentSize.width * UIScreen.main.scale
+        let h: CGFloat = view.intrinsicContentSize.height * UIScreen.main.scale
 
 
-        let ratioW = imageView.frame.width / w
-        let ratioH = imageView.frame.height / h
+        let ratioW = view.frame.width / w
+        let ratioH = view.frame.height / h
 
         let ratio = ratioW < ratioH ? ratioW : ratioH
 
         let newWidth = w*ratio
         let newHeight = h*ratio
 
-        let left = 0.5 * (newWidth * scrollView.zoomScale > imageView.frame.width
-                          ? (newWidth - imageView.frame.width)
-                          : (scrollView.frame.width - imageView.frame.width))
-        let top = 0.5 * (newHeight * scrollView.zoomScale > imageView.frame.height
-                         ? (newHeight - imageView.frame.height)
-                         : (scrollView.frame.height - imageView.frame.height))
+        let left = 0.5 * (newWidth * scrollView.zoomScale > view.frame.width
+                          ? (newWidth - view.frame.width)
+                          : (scrollView.frame.width - view.frame.width))
+        let top = 0.5 * (newHeight * scrollView.zoomScale > view.frame.height
+                         ? (newHeight - view.frame.height)
+                         : (scrollView.frame.height - view.frame.height))
 
         if zoomScale <= maximumZoomScale {
             contentInset = UIEdgeInsets(top: top - safeAreaInsets.top, left: left, bottom: top - safeAreaInsets.bottom, right: left)
@@ -211,10 +199,10 @@ class ZoomableView: UIScrollView, UIScrollViewDelegate {
                 let offset = contentOffset.y
                 if offset < 0 {
                     let nrom = normalize(from: 0, at: abs(offset), to: frame.size.height)
-                    let nrom2 = normalize(from: 0, at: nrom, to: 0.2)
-                    zoomViewDelegate?.fadeProgress(val: 1 - nrom2)
+                    let norm2 = normalize(from: 0, at: nrom, to: config.fullFadeOnDragAt)
+                    config.backgroundOpacity?.wrappedValue = 1 - norm2
                 } else {
-                    zoomViewDelegate?.fadeProgress(val: 1)
+                    config.backgroundOpacity?.wrappedValue = 1
                 }
             }
             
@@ -225,22 +213,28 @@ class ZoomableView: UIScrollView, UIScrollViewDelegate {
     func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
         
         let offset = contentOffset.y
-        let percentage = (offset / (contentSize.height - bounds.size.height)) * 100
+        let percentage = offset / (contentSize.height - bounds.size.height)
         
-        if wasTracking, percentage < -10, !isZoomHappening, velocity.y < -1.3, config.dismissCallback != nil {
+        if wasTracking, percentage < -config.dismissTriggerOffset,
+           !isZoomHappening,
+            velocity.y < -config.dismissVelocity,
+           config.dismissCallback != nil {
             isAnimating = true
             let ogFram = frame.origin
             DispatchQueue.main.async {
-                withAnimation(.linear(duration: 0.2)) {
-                    self.zoomViewDelegate?.fadeProgress(val: 0)
+                withAnimation(.linear(duration: self.config.dismissAnimationLength)) {
+                    self.config.backgroundOpacity?.wrappedValue = 0
                 }
-                UIView.animate(withDuration: 0.2, animations: {
+                UIView.animate(withDuration: self.config.dismissAnimationLength, animations: {
                     self.frame.origin = CGPoint(x: ogFram.x, y: self.frame.size.height)
                 }) { _ in
-                    // Cancel swiftUI dismiss animations
-                    var transaction = Transaction()
-                    transaction.disablesAnimations = true
-                    withTransaction(transaction) {
+                    if self.config.shouldCacnelSwiftUIAnimationsOnDismiss {
+                        var transaction = Transaction()
+                        transaction.disablesAnimations = true
+                        withTransaction(transaction) {
+                            self.config.dismissCallback?()
+                        }
+                    } else {
                         self.config.dismissCallback?()
                     }
                 }

@@ -16,10 +16,8 @@ protocol ViewLoader: AnyObject {
 class PagerView: UIScrollView {
     var isFirstLoad = false
     var loadedViews = [ZoomableView]()
-    let preloadAmount = 3
     var config: Config
     weak var viewLoader: ViewLoader?
-    weak var zoomViewDelegate: ZoomViewDelegate?
     
     private var internalIndex: Int = 0
     var page: Binding<Int>
@@ -63,18 +61,18 @@ class PagerView: UIScrollView {
         }
         
         if subviews.isEmpty {
-            for i in currentIndex...(currentIndex + preloadAmount) {
+            for i in currentIndex...(currentIndex + config.preloadAmount) {
                 appendView(at: i)
             }
-            for i in ((currentIndex - preloadAmount)..<currentIndex).reversed() {
+            for i in ((currentIndex - config.preloadAmount)..<currentIndex).reversed() {
                 prependView(at: i)
             }
         }
         
         if let lastView = loadedViews.last {
             let diff = lastView.index - currentIndex
-            if diff < (preloadAmount) {
-                for i in lastView.index..<(lastView.index + (preloadAmount - diff)) {
+            if diff < (config.preloadAmount) {
+                for i in lastView.index..<(lastView.index + (config.preloadAmount - diff)) {
                     appendView(at: i + 1)
                 }
             }
@@ -82,8 +80,8 @@ class PagerView: UIScrollView {
         
         if let firstView = loadedViews.first {
             let diff = currentIndex - firstView.index
-            if diff < (preloadAmount) {
-                for i in (firstView.index - (preloadAmount - diff)..<firstView.index).reversed() {
+            if diff < (config.preloadAmount) {
+                for i in (firstView.index - (config.preloadAmount - diff)..<firstView.index).reversed() {
                     prependView(at: i)
                 }
             }
@@ -96,7 +94,6 @@ class PagerView: UIScrollView {
     
     
     func addSubview(_ zoomView: ZoomableView) {
-        zoomView.zoomViewDelegate = zoomViewDelegate
         super.addSubview(zoomView)
         NSLayoutConstraint.activate([
             zoomView.widthAnchor.constraint(equalTo: frameLayoutGuide.widthAnchor),
@@ -190,7 +187,7 @@ class PagerView: UIScrollView {
     
     func removeOutOfFrameViews() {
         for view in loadedViews {
-            if abs(currentIndex - view.index) > preloadAmount {
+            if abs(currentIndex - view.index) > config.preloadAmount {
                 remove(view: view)
             }
         }

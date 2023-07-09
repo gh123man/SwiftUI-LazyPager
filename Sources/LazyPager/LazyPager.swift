@@ -14,12 +14,20 @@ public enum DoubleTap {
     case scale(CGFloat)
 }
 
-struct Config {
+public struct Config {
+    var backgroundOpacity: Binding<CGFloat>?
     var minZoom: CGFloat = 1
     var maxZoom: CGFloat = 1
     var doubleTapSetting: DoubleTap = .disabled
     var dismissCallback: (() -> ())?
     var tapCallback: (() -> ())?
+    
+    var preloadAmount: Int = 3
+    var dismissVelocity: CGFloat = 1.3
+    var dismissAnimationLength: CGFloat = 0.2
+    var dismissTriggerOffset: CGFloat = 0.1
+    var shouldCacnelSwiftUIAnimationsOnDismiss = true
+    var fullFadeOnDragAt: CGFloat = 0.2
 }
 
 
@@ -29,7 +37,6 @@ public struct LazyPager<Content: View, DataType> {
     private var data: [DataType]
     private var page: Binding<Int>
     
-    var backgroundOpacity: Binding<CGFloat>?
     var config = Config()
     
     public init(data: [DataType],
@@ -46,7 +53,7 @@ public struct LazyPager<Content: View, DataType> {
 public extension LazyPager {
     func onDismiss(backgroundOpacity: Binding<CGFloat>? = nil, _ callback: @escaping () -> ()) -> LazyPager {
         var this = self
-        this.backgroundOpacity = backgroundOpacity
+        this.config.backgroundOpacity = backgroundOpacity
         this.config.dismissCallback = callback
         return this
     }
@@ -64,6 +71,12 @@ public extension LazyPager {
         this.config.doubleTapSetting = doubleTapGesture
         return this
     }
+    
+    func settings(_ adjust: @escaping (Config) -> Config) -> LazyPager {
+        var this = self
+        this.config = adjust(this.config)
+        return this
+    }
 }
 
 extension LazyPager: UIViewRepresentable {
@@ -78,7 +91,6 @@ extension LazyPager: UIViewRepresentable {
         return Coordinator(data: data,
                            page: page,
                            config: config,
-                           backgroundOpacity: backgroundOpacity,
                            viewLoader: viewLoader)
     }
 
