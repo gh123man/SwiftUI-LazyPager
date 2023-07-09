@@ -73,7 +73,6 @@ class ZoomableView: UIScrollView, UIScrollViewDelegate {
         alwaysBounceVertical = true
         showsVerticalScrollIndicator = false
         showsHorizontalScrollIndicator = false
-        contentInsetAdjustmentBehavior = .never
         addSubview(view)
         
         NSLayoutConstraint.activate([
@@ -90,7 +89,6 @@ class ZoomableView: UIScrollView, UIScrollViewDelegate {
         
         v.translatesAutoresizingMaskIntoConstraints = false
         addSubview(v)
-//        v.backgroundColor = .green
         
         
         NSLayoutConstraint.activate([
@@ -149,7 +147,7 @@ class ZoomableView: UIScrollView, UIScrollViewDelegate {
                          ? (newHeight - imageView.frame.height)
                          : (scrollView.frame.height - imageView.frame.height))
 
-        contentInset = UIEdgeInsets(top: top, left: left, bottom: top, right: left)
+        contentInset = UIEdgeInsets(top: top - safeAreaInsets.top, left: left, bottom: top - safeAreaInsets.bottom, right: left)
     }
     
     func updateState() {
@@ -164,6 +162,9 @@ class ZoomableView: UIScrollView, UIScrollViewDelegate {
         }
         
         if allowScroll {
+            // Counteract content inset adjustments. Makes .ignoresSafeArea() work
+            contentInset = UIEdgeInsets(top: -safeAreaInsets.top, left: 0, bottom: -safeAreaInsets.bottom, right: 0)
+            
             let offset = contentOffset.y
             
             if !isAnimating {
