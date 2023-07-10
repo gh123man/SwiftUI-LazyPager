@@ -220,10 +220,10 @@ class PagerView: UIScrollView {
 extension PagerView: UIScrollViewDelegate {
     
     public func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        let visible = loadedViews.first { isSubviewVisible($0, in: scrollView) }
-        let newIndex = loadedViews.firstIndex(where: { $0.index == visible?.index })!
+        guard let visible = loadedViews.first(where: { isSubviewVisible($0, in: scrollView) }) else { return }
+        guard let newIndex = loadedViews.firstIndex(where: { $0.index == visible.index }) else { return }
         if newIndex != internalIndex, !scrollView.isTracking {
-            currentIndex = visible!.index
+            currentIndex = visible.index
             internalIndex = newIndex
         }
         resizeOutOfBoundsViews()

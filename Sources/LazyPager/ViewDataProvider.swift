@@ -47,7 +47,9 @@ extension ViewDataProvider: ViewLoader {
             return nil
         }
         
-        let loadedContent = UIHostingController(rootView: viewLoader(dta)).view!
+        guard let loadedContent = UIHostingController(rootView: viewLoader(dta)).view else {
+            return nil
+        }
         
         loadedContent.translatesAutoresizingMaskIntoConstraints = false
         loadedContent.backgroundColor = .clear
