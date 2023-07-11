@@ -4,7 +4,7 @@ A Lazy loaded, Zooming, Panning, and gesture dismissable pager view for SwiftUI.
 
 The goal with this library is to expose a simple SwiftUI interface for a flued and seamless content viewer.
 
-[![Watch the video](/media/example.mov)](/media/example.mov)
+<video src="/media/example.mp4" autoplay> </video>
 
 # Usage
 
