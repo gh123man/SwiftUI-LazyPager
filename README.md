@@ -5,8 +5,9 @@ A Lazy loaded, Zooming, Panning, and gesture dismissable pager view for SwiftUI.
 The goal with this library is to expose a simple SwiftUI interface for a flued and seamless content viewer.
 
 
-![output](https://github.com/gh123man/LazyPager/assets/959778/a82da8c3-9d65-4782-8fd7-40cc598e16da)
-
+<p align="center">
+  <img src="https://github.com/gh123man/LazyPager/assets/959778/a82da8c3-9d65-4782-8fd7-40cc598e16da" alt="animated" />
+</p>
 
 
 # Usage
