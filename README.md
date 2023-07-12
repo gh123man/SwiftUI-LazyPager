@@ -8,6 +8,8 @@ The goal with this library is to expose a simple SwiftUI interface for a fluid a
   <img src="https://github.com/gh123man/LazyPager/assets/959778/a82da8c3-9d65-4782-8fd7-40cc598e16da" alt="animated" />
 </p>
 
+The above example is from [dateit](https://dateit.com/) demonstrating the capabilities of this library. Note: the is custom and can be added by putting `LazyPager` inside a `ZStack`
+
 ## Highlights 
 
 - Buttery smooth scrolling/panning/zooming
@@ -74,3 +76,18 @@ var body: some View {
 - Drag to dismiss is supported with `.onDismiss` - Supply a binding opacity value to control the background opacity during the transition. 
 - Tap events are handled internally, so use `.onTap` to handle single taps (useful for hiding and showing UI)
 - Use `.settings` to [modify advanced settings](https://github.com/gh123man/LazyPager/blob/master/Sources/LazyPager/LazyPager.swift#L17)
+
+
+## Detailed usage
+
+### Working with `fullScreenCover`
+
+`fullScreenCover` is a good native element for displaying a photo browser, however it has an opaque background by default that is difficult to remove. So `LazyPager` provides a `ClearFullScreenBackground` background view you can use to fix it. Simply add `.background(ClearFullScreenBackground())` to the root element of your `fullScreenCover`. This makes the pull to dismiss gesture seamless. 
+
+### Double tap to zoom
+You can customize the double tap behavior using the `zoomable(min: CGFloat, max: CGFloat, doubleTapGesture: DoubleTap)`. By default `doubleTapGesture` is set to `.scale(0.5)` which means "zoom 50% when double tapped". You can change this to a different ratio or set it to `.disabled` to disable the double tap gesture. 
+
+### Dismiss gesture handling 
+By default `.onDismiss` will be called after the pull to dismiss gesture is completed. It is often desirable to fade out the background in the process. `LazyPager` uses a fully transparent background by default so you can set your own custom background. 
+
+To control the dismiss opacity of a custom background, use a `Binding<CGFloat>` like `.onDismiss(backgroundOpacity: $opacity) {` to fade out your custom background.
