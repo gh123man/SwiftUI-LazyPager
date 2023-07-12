@@ -8,7 +8,7 @@ The goal with this library is to expose a simple SwiftUI interface for a fluid a
   <img src="https://github.com/gh123man/LazyPager/assets/959778/a82da8c3-9d65-4782-8fd7-40cc598e16da" alt="animated" />
 </p>
 
-The above example is from [dateit](https://dateit.com/) demonstrating the capabilities of this library. Note: the is custom and can be added by putting `LazyPager` inside a `ZStack`
+The above example is from [dateit](https://dateit.com/) demonstrating the capabilities of this library. Note: the overlay is custom and can be added by putting `LazyPager` inside a `ZStack`
 
 # Highlights 
 
@@ -19,6 +19,17 @@ The above example is from [dateit](https://dateit.com/) demonstrating the capabi
 
 
 # Usage
+
+## Add the Swift Package
+
+1. Right click on your project -> `Add Package`
+2. In the search bar paste: `https://github.com/gh123man/LazyPager`
+3. Click `Add Package`
+
+Or add the package to your `Package.swift` if your project is a Swift package.
+
+
+## Example
 
 ```swift 
 @State var data = [ ... ]
