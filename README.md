@@ -10,7 +10,7 @@ The goal with this library is to expose a simple SwiftUI interface for a fluid a
 
 The above example is from [dateit](https://dateit.com/) demonstrating the capabilities of this library. Note: the is custom and can be added by putting `LazyPager` inside a `ZStack`
 
-## Highlights 
+# Highlights 
 
 - Buttery smooth scrolling/panning/zooming
 - Swipe down to dismiss 
@@ -65,6 +65,8 @@ var body: some View {
 }
 ```
 
+For a full working example, [open the sample project](https://github.com/gh123man/LazyPager/tree/master/Examples) in the examples folder, or [check out the code here](https://github.com/gh123man/LazyPager/blob/master/Examples/ImageScrollView/ContentView.swift).
+
 # Features
 
 - All content is lazy loaded. By default content is pre-loaded 3 elements ahead and behind the current index. 
@@ -78,16 +80,16 @@ var body: some View {
 - Use `.settings` to [modify advanced settings](https://github.com/gh123man/LazyPager/blob/master/Sources/LazyPager/LazyPager.swift#L17)
 
 
-## Detailed usage
+# Detailed usage
 
-### Working with `fullScreenCover`
+## Working with `fullScreenCover`
 
 `fullScreenCover` is a good native element for displaying a photo browser, however it has an opaque background by default that is difficult to remove. So `LazyPager` provides a `ClearFullScreenBackground` background view you can use to fix it. Simply add `.background(ClearFullScreenBackground())` to the root element of your `fullScreenCover`. This makes the pull to dismiss gesture seamless. 
 
-### Double tap to zoom
+## Double tap to zoom
 You can customize the double tap behavior using the `zoomable(min: CGFloat, max: CGFloat, doubleTapGesture: DoubleTap)`. By default `doubleTapGesture` is set to `.scale(0.5)` which means "zoom 50% when double tapped". You can change this to a different ratio or set it to `.disabled` to disable the double tap gesture. 
 
-### Dismiss gesture handling 
+## Dismiss gesture handling 
 By default `.onDismiss` will be called after the pull to dismiss gesture is completed. It is often desirable to fade out the background in the process. `LazyPager` uses a fully transparent background by default so you can set your own custom background. 
 
 To control the dismiss opacity of a custom background, use a `Binding<CGFloat>` like `.onDismiss(backgroundOpacity: $opacity) {` to fade out your custom background.
