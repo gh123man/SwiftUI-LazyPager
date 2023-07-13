@@ -15,19 +15,47 @@ public enum DoubleTap {
 }
 
 public struct Config {
+    /// binding variable to control a custom background opacity. LazyPager is transparent by default
     public var backgroundOpacity: Binding<CGFloat>?
+    
+    /// The minimum zoom level (https://developer.apple.com/documentation/uikit/uiscrollview/1619428-minimumzoomscale)
     public var minZoom: CGFloat = 1
+    
+    /// The maximum zoom level (https://developer.apple.com/documentation/uikit/uiscrollview/1619408-maximumzoomscale)
     public var maxZoom: CGFloat = 1
+    
+    /// How to handle double tap events
     public var doubleTapSetting: DoubleTap = .disabled
+    
+    /// Called when the view is done dismissing - dismiss gesture is disabled if nil
     public var dismissCallback: (() -> ())?
+    
+    /// Called when tapping once
     public var tapCallback: (() -> ())?
     
+    /// Advanced settings (only accessible via .settings)
+    
+    /// How may out of view pages to load in advance (forward and backwards)
     public var preloadAmount: Int = 3
+    
+    /// Minimum swipe velocity needed to trigger a dismiss
     public var dismissVelocity: CGFloat = 1.3
-    public var dismissAnimationLength: CGFloat = 0.2
+    
+    /// the minimum % (between 0 and 1) you need to drag to trigger a dismiss
     public var dismissTriggerOffset: CGFloat = 0.1
-    public var shouldCacnelSwiftUIAnimationsOnDismiss = true
+    
+    /// How long to animate the dismiss once done dragging
+    public var dismissAnimationLength: CGFloat = 0.2
+    
+    /// Cancel SwiftUI animations. Default to true because the dismiss gesture is already animated.
+    /// Stacking animations can cause undesirable behavior
+    public var shouldCancelSwiftUIAnimationsOnDismiss = true
+    
+    /// At what drag % (between 0 and 1) the background should be fully transparent
     public var fullFadeOnDragAt: CGFloat = 0.2
+    
+    /// The minimum scroll distance the in which the pinch gesture is enabled
+    public var pinchGestureEnableOffset: Double = 10
 }
 
 public struct LazyPager<Content: View, DataType> {
@@ -82,7 +110,7 @@ extension LazyPager: UIViewRepresentable {
         DispatchQueue.main.async {
             context.coordinator.goToPage(page.wrappedValue)
         }
-        return context.coordinator.scrollView
+        return context.coordinator.pagerView
     }
     
     public func makeCoordinator() -> Coordinator {

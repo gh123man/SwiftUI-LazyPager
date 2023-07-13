@@ -9,11 +9,10 @@ import Foundation
 import UIKit
 import SwiftUI
 
-class ZoomableView: UIScrollView, UIScrollViewDelegate {
+class ZoomableView: UIScrollView {
     
     var trailingConstraint: NSLayoutConstraint?
     var leadingConstraint: NSLayoutConstraint?
-    
     var contentTopToContent: NSLayoutConstraint!
     var contentTopToFrame: NSLayoutConstraint!
     var contentBottomToFrame: NSLayoutConstraint!
@@ -46,8 +45,8 @@ class ZoomableView: UIScrollView, UIScrollViewDelegate {
     var isZoomHappening = false
     var lastInset: CGFloat = 0
     var view: UIView
-    
     var index: Int
+    
     init(view: UIView, index: Int, config: Config) {
         self.index = index
         self.view = view
@@ -102,15 +101,13 @@ class ZoomableView: UIScrollView, UIScrollViewDelegate {
         singleTapGesture.numberOfTouchesRequired = 1
         addGestureRecognizer(singleTapGesture)
         
-        switch config.doubleTapSetting {
-        case .scale:
+        if case .scale = config.doubleTapSetting {
             let doubleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(doubleTap(_:)))
             doubleTapRecognizer.numberOfTapsRequired = 2
             doubleTapRecognizer.numberOfTouchesRequired = 1
             addGestureRecognizer(doubleTapRecognizer)
             
             singleTapGesture.require(toFail: doubleTapRecognizer)
-        default: break
         }
         
         DispatchQueue.main.async {
@@ -129,10 +126,53 @@ class ZoomableView: UIScrollView, UIScrollViewDelegate {
     @objc func doubleTap(_ recognizer:UITapGestureRecognizer) {
         if case let .scale(scale) = config.doubleTapSetting {
             let pointInView = recognizer.location(in: view)
-            zoomInOrOut(at: pointInView, scale: scale)
+            zoom(at: pointInView, scale: scale)
         }
     }
     
+    func updateState() {
+        
+        allowScroll = zoomScale == 1
+
+        if contentOffset.y > config.pinchGestureEnableOffset, allowScroll {
+            pinchGestureRecognizer?.isEnabled = false
+        } else {
+            pinchGestureRecognizer?.isEnabled = true
+        }
+        
+        if allowScroll {
+            // Counteract content inset adjustments. Makes .ignoresSafeArea() work
+            contentInset = UIEdgeInsets(top: -safeAreaInsets.top, left: 0, bottom: -safeAreaInsets.bottom, right: 0)
+            
+            if !isAnimating, config.dismissCallback != nil {
+                let offset = contentOffset.y
+                if offset < 0 {
+                    let absoluteDragOffset = normalize(from: 0, at: abs(offset), to: frame.size.height)
+                    let fadeOffset = normalize(from: 0, at: absoluteDragOffset, to: config.fullFadeOnDragAt)
+                    config.backgroundOpacity?.wrappedValue = 1 - fadeOffset
+                } else {
+                    config.backgroundOpacity?.wrappedValue = 1
+                }
+            }
+            
+            wasTracking = isTracking
+        }
+    }
+    
+    func zoom(at point: CGPoint, scale: CGFloat) {
+        let mid = lerp(from: minimumZoomScale, to: maximumZoomScale, by: scale)
+        let newZoomScale = zoomScale == minimumZoomScale ? mid : minimumZoomScale
+        let size = bounds.size
+        let w = size.width / newZoomScale
+        let h = size.height / newZoomScale
+        let x = point.x - (w * 0.5)
+        let y = point.y - (h * 0.5)
+        zoom(to: CGRect(x: x, y: y, width: w, height: h), animated: true)
+    }
+}
+
+
+extension ZoomableView: UIScrollViewDelegate {
     
     func scrollViewWillBeginZooming(_ scrollView: UIScrollView, with view: UIView?) {
         isZoomHappening = true
@@ -149,14 +189,13 @@ class ZoomableView: UIScrollView, UIScrollViewDelegate {
     }
     
     func viewForZooming(in scrollView: UIScrollView) -> UIView? {
-        return scrollView.subviews[0]
+        return view
     }
     
     func scrollViewDidZoom(_ scrollView: UIScrollView) {
         
         let w: CGFloat = view.intrinsicContentSize.width * UIScreen.main.scale
         let h: CGFloat = view.intrinsicContentSize.height * UIScreen.main.scale
-
 
         let ratioW = view.frame.width / w
         let ratioH = view.frame.height / h
@@ -176,82 +215,38 @@ class ZoomableView: UIScrollView, UIScrollViewDelegate {
         if zoomScale <= maximumZoomScale {
             contentInset = UIEdgeInsets(top: top - safeAreaInsets.top, left: left, bottom: top - safeAreaInsets.bottom, right: left)
         }
-        
-    }
-    
-    func updateState() {
-        
-        allowScroll = zoomScale == 1
-
-        if contentOffset.y > 10 && zoomScale == 1 {
-            allowScroll = true
-            pinchGestureRecognizer?.isEnabled = false
-        } else {
-            pinchGestureRecognizer?.isEnabled = true
-        }
-        
-        if allowScroll {
-            // Counteract content inset adjustments. Makes .ignoresSafeArea() work
-            contentInset = UIEdgeInsets(top: -safeAreaInsets.top, left: 0, bottom: -safeAreaInsets.bottom, right: 0)
-            
-            
-            if !isAnimating, config.dismissCallback != nil {
-                let offset = contentOffset.y
-                if offset < 0 {
-                    let nrom = normalize(from: 0, at: abs(offset), to: frame.size.height)
-                    let norm2 = normalize(from: 0, at: nrom, to: config.fullFadeOnDragAt)
-                    config.backgroundOpacity?.wrappedValue = 1 - norm2
-                } else {
-                    config.backgroundOpacity?.wrappedValue = 1
-                }
-            }
-            
-            wasTracking = isTracking
-        }
     }
     
     func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
         
-        let offset = contentOffset.y
-        let percentage = offset / (contentSize.height - bounds.size.height)
+        let percentage = contentOffset.y / (contentSize.height - bounds.size.height)
         
-        if wasTracking, percentage < -config.dismissTriggerOffset,
+        if wasTracking,
+           percentage < -config.dismissTriggerOffset,
            !isZoomHappening,
-            velocity.y < -config.dismissVelocity,
+           velocity.y < -config.dismissVelocity,
            config.dismissCallback != nil {
+            
             isAnimating = true
             let ogFram = frame.origin
-            DispatchQueue.main.async {
-                withAnimation(.linear(duration: self.config.dismissAnimationLength)) {
-                    self.config.backgroundOpacity?.wrappedValue = 0
-                }
-                UIView.animate(withDuration: self.config.dismissAnimationLength, animations: {
-                    self.frame.origin = CGPoint(x: ogFram.x, y: self.frame.size.height)
-                }) { _ in
-                    if self.config.shouldCacnelSwiftUIAnimationsOnDismiss {
-                        var transaction = Transaction()
-                        transaction.disablesAnimations = true
-                        withTransaction(transaction) {
-                            self.config.dismissCallback?()
-                        }
-                    } else {
+            
+            withAnimation(.linear(duration: self.config.dismissAnimationLength)) {
+                self.config.backgroundOpacity?.wrappedValue = 0
+            }
+            
+            UIView.animate(withDuration: self.config.dismissAnimationLength, animations: {
+                self.frame.origin = CGPoint(x: ogFram.x, y: self.frame.size.height)
+            }) { _ in
+                if self.config.shouldCancelSwiftUIAnimationsOnDismiss {
+                    var transaction = Transaction()
+                    transaction.disablesAnimations = true
+                    withTransaction(transaction) {
                         self.config.dismissCallback?()
                     }
+                } else {
+                    self.config.dismissCallback?()
                 }
             }
         }
     }
-    
-    func zoomInOrOut(at point: CGPoint, scale: CGFloat) {
-        let mid = lerp(from: minimumZoomScale, to: maximumZoomScale, by: scale)
-        let newZoomScale = zoomScale == minimumZoomScale ? mid : minimumZoomScale
-        let size = bounds.size
-        let w = size.width / newZoomScale
-        let h = size.height / newZoomScale
-        let x = point.x - (w * 0.5)
-        let y = point.y - (h * 0.5)
-        let rect = CGRect(x: x, y: y, width: w, height: h)
-        zoom(to: rect, animated: true)
-    }
 }
-

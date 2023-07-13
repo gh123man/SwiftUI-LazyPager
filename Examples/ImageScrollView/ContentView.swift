@@ -27,8 +27,8 @@ struct ContentView: View {
             show.toggle()
         }
         .fullScreenCover(isPresented: $show) {
-            LazyPager(data: data, page: $index) { data in
-                Image(data)
+            LazyPager(data: data, page: $index) { element in
+                Image(element)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
             }
@@ -41,8 +41,8 @@ struct ContentView: View {
             }
             .background(.black.opacity(opacity))
             .background(ClearFullScreenBackground())
+            .ignoresSafeArea()
         }
-        .ignoresSafeArea()
     }
 }
 

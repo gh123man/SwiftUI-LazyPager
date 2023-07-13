@@ -15,7 +15,7 @@ public class ViewDataProvider<Content: View, DataType> {
     var data: [DataType]
     var config: Config
     
-    var scrollView: PagerView
+    var pagerView: PagerView
     
     var contentTopToFrame: NSLayoutConstraint!
     var contentTopToContent: NSLayoutConstraint!
@@ -30,26 +30,21 @@ public class ViewDataProvider<Content: View, DataType> {
         self.data = data
         self.viewLoader = viewLoader
         self.config = config
-        self.scrollView = PagerView(page: page, config: config)
-        self.scrollView.viewLoader = self
+        self.pagerView = PagerView(page: page, config: config)
+        self.pagerView.viewLoader = self
         
-        scrollView.computeViewState()
+        pagerView.computeViewState()
     }
     
     func goToPage(_ page: Int) {
-        scrollView.goToPage(page)
+        pagerView.goToPage(page)
     }
 }
 
 extension ViewDataProvider: ViewLoader {
     func loadView(at index: Int) -> ZoomableView? {
-        guard let dta = data[safe: index] else {
-            return nil
-        }
-        
-        guard let loadedContent = UIHostingController(rootView: viewLoader(dta)).view else {
-            return nil
-        }
+        guard let dta = data[safe: index] else { return nil }
+        guard let loadedContent = UIHostingController(rootView: viewLoader(dta)).view else { return nil }
         
         loadedContent.translatesAutoresizingMaskIntoConstraints = false
         loadedContent.backgroundColor = .clear

@@ -1,6 +1,6 @@
 # LazyPager for SwiftUI
 
-A Lazy loaded, panning, zooming, and gesture dismissable pager view for SwiftUI. 
+A buttery smooth, lazy loaded, panning, zooming, and gesture dismissable pager view for SwiftUI. 
 
 The goal with this library is to expose a simple SwiftUI interface for a fluid and seamless content viewer.
 
@@ -9,14 +9,6 @@ The goal with this library is to expose a simple SwiftUI interface for a fluid a
 </p>
 
 The above example is from [dateit](https://dateit.com/) demonstrating the capabilities of this library. Note: the overlay is custom and can be added by putting `LazyPager` inside a `ZStack`
-
-# Highlights 
-
-- Buttery smooth scrolling/panning/zooming
-- Swipe down to dismiss 
-- Double tap to zoom
-- Lazy loading
-
 
 # Usage
 
@@ -34,7 +26,7 @@ Or add the package to your `Package.swift` if your project is a Swift package.
 ```swift 
 @State var data = [ ... ]
 @State var show = true
-@State var opacity: CGFloat = 1 // Dismiss gesture opacity 
+@State var opacity: CGFloat = 1 // Dismiss gesture background opacity 
 @State var index = 0
 
 var body: some View {
@@ -44,10 +36,10 @@ var body: some View {
     .fullScreenCover(isPresented: $show) {
 
         // Provide any list of data and bind to an index
-        LazyPager(data: data, page: $index) { data in
+        LazyPager(data: data, page: $index) { element in
 
             // Supports any kind of view - not only images
-            Image(data)
+            Image(element)
                 .resizable()
                 .aspectRatio(contentMode: .fit)
         }
@@ -55,7 +47,7 @@ var body: some View {
         // Make the content zoomable
         .zoomable(min: 1, max: 5)
 
-        // Enable the swipe to dismiss gesture
+        // Enable the swipe to dismiss gesture and background opacity control
         .onDismiss(backgroundOpacity: $opacity) {
             show = false
         }
@@ -70,9 +62,10 @@ var body: some View {
 
         // A special included modifier to help make fullScreenCover transparent
         .background(ClearFullScreenBackground())
+        
+        // Works with safe areas or ignored safe areas
+        .ignoresSafeArea()
     }
-    // Works with safe areas or ignored safe areas
-    .ignoresSafeArea()
 }
 ```
 
