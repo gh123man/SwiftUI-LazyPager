@@ -58,7 +58,7 @@ public struct Config {
     public var pinchGestureEnableOffset: Double = 10
 }
 
-public struct LazyPager<Element: Equatable, Content: View> {
+public struct LazyPager<Element, Content: View> {
     private var viewLoader: (Element) -> Content
     private var data: [Element]
     private var page: Binding<Int>

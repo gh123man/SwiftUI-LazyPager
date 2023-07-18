@@ -9,13 +9,13 @@ import Foundation
 import SwiftUI
 import UIKit
 
-public class ViewDataProvider<Content: View, Element: Equatable>: ViewLoader {
+public class ViewDataProvider<Content: View, Element>: ViewLoader {
     private var viewLoader: (Element) -> Content
     
     var data: [Element]
     var config: Config
     
-    var pagerView: PagerView<Element, ViewDataProvider>
+    var pagerView: PagerView<Element, ViewDataProvider, Content>
     
     var contentTopToFrame: NSLayoutConstraint!
     var contentTopToContent: NSLayoutConstraint!
@@ -44,28 +44,17 @@ public class ViewDataProvider<Content: View, Element: Equatable>: ViewLoader {
         pagerView.reloadViews()
         pagerView.computeViewState()
     }
-//}
-//
-//extension ViewDataProvider: ViewLoader {
-    func loadView(at index: Int) -> ZoomableView<Element>? {
+
+    //MARK: ViewLoader
+    
+    func loadView(at index: Int) -> ZoomableView<Element, Content>? {
         guard let dta = data[safe: index] else { return nil }
-        guard let loadedContent = UIHostingController(rootView: viewLoader(dta)).view else { return nil }
-        
-        loadedContent.translatesAutoresizingMaskIntoConstraints = false
-        loadedContent.backgroundColor = .clear
-        
-        return ZoomableView(view: loadedContent, index: index, data: dta, config: config)
+        let hostingController = UIHostingController(rootView: viewLoader(dta))
+        return ZoomableView(hostingController: hostingController, index: index, data: dta, config: config)
     }
     
-    func replaceViewIfNeeded(for zoomableView: ZoomableView<Element>) {
-        if data[zoomableView.index] == zoomableView.data { return }
-        
+    func updateHostedView(for zoomableView: ZoomableView<Element, Content>) {
         guard let dta = data[safe: zoomableView.index] else { return }
-        guard let loadedContent = UIHostingController(rootView: viewLoader(dta)).view else { return }
-        
-        loadedContent.translatesAutoresizingMaskIntoConstraints = false
-        loadedContent.backgroundColor = .clear
-        
-        zoomableView.replace(view: loadedContent)
+        zoomableView.hostingController.rootView = viewLoader(dta)
     }
 }

@@ -9,35 +9,34 @@ import SwiftUI
 import LazyPager
 
 
-//struct Foo: Equatable {
+struct Foo {
 //    static func == (lhs: Foo, rhs: Foo) -> Bool {
 //        return lhs.img == rhs.img
 //    }
-//
-//    let id = UUID()
-//    var img: String
-//    var thign = barfoo()
-//}
+
+    let id = UUID()
+    var img: String
+}
 
 struct ContentView: View {
     
-//    @State var data = [
-//        Foo(img: "nora1"),
-//        Foo(img: "nora2"),
-//        Foo(img: "nora3"),
-////        "nora4",
-////        "nora5",
-////        "nora6",
-//    ]
-    
     @State var data = [
-        "nora1",
-        "nora2",
-        "nora3",
-        "nora5",
-        "nora6",
+        Foo(img: "nora1"),
+        Foo(img: "nora2"),
+        Foo(img: "nora3"),
+//        "nora4",
+//        "nora5",
+//        "nora6",
     ]
     
+//    @State var data = [
+//        "nora1",
+//        "nora2",
+//        "nora3",
+//        "nora5",
+//        "nora6",
+//    ]
+//
     @State var show = true
     @State var opacity: CGFloat = 1
     @State var index = 0
@@ -48,7 +47,7 @@ struct ContentView: View {
         .fullScreenCover(isPresented: $show) {
             ZStack {
                 LazyPager(data: data, page: $index) { element in
-                    Image(element)
+                    Image(element.img)
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                 }
@@ -68,10 +67,13 @@ struct ContentView: View {
 //                        data.insert("nora4", at: 0)
 //                    }
                     Button("append") {
-                        data.append("nora4")
+                        data.append(Foo(img: "nora4"))
+                    }
+                    Button("replace") {
+                        data[0] = Foo(img: "nora4")
                     }
                     Button("update") {
-                        data[0] = "nora5"
+                        data[0].img = "nora5"
                     }
                 }
                 .padding()

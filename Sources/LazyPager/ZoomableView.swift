@@ -9,7 +9,7 @@ import Foundation
 import UIKit
 import SwiftUI
 
-class ZoomableView<Element>: UIScrollView, UIScrollViewDelegate {
+class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate {
     
     var trailingConstraint: NSLayoutConstraint?
     var leadingConstraint: NSLayoutConstraint?
@@ -44,13 +44,16 @@ class ZoomableView<Element>: UIScrollView, UIScrollViewDelegate {
     var isAnimating = false
     var isZoomHappening = false
     var lastInset: CGFloat = 0
-    var view: UIView
+    var view: UIView {
+        return hostingController.view
+    }
+    var hostingController: UIHostingController<Content>
     var index: Int
     var data: Element
     
-    init(view: UIView, index: Int, data: Element, config: Config) {
+    init(hostingController: UIHostingController<Content>, index: Int, data: Element, config: Config) {
         self.index = index
-        self.view = view
+        self.hostingController = hostingController
         self.data = data
         self.config = config
         let v = UIView()
@@ -71,7 +74,22 @@ class ZoomableView<Element>: UIScrollView, UIScrollViewDelegate {
         }
         showsVerticalScrollIndicator = false
         showsHorizontalScrollIndicator = false
-        add(view: view)
+        
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.backgroundColor = .clear
+        addSubview(view)
+        
+        NSLayoutConstraint.activate([
+            view.leadingAnchor.constraint(equalTo: leadingAnchor),
+            view.trailingAnchor.constraint(equalTo: trailingAnchor),
+            view.widthAnchor.constraint(equalTo: frameLayoutGuide.widthAnchor),
+            view.heightAnchor.constraint(equalTo: frameLayoutGuide.heightAnchor),
+        ])
+        
+        contentTopToFrame = view.topAnchor.constraint(equalTo: contentLayoutGuide.topAnchor)
+        contentTopToContent = view.topAnchor.constraint(equalTo: topAnchor)
+        contentBottomToFrame = view.bottomAnchor.constraint(equalTo: contentLayoutGuide.bottomAnchor)
+        contentBottomToView = view.bottomAnchor.constraint(equalTo: bottomView.topAnchor)
         
         v.translatesAutoresizingMaskIntoConstraints = false
         addSubview(v)
@@ -103,34 +121,6 @@ class ZoomableView<Element>: UIScrollView, UIScrollViewDelegate {
         DispatchQueue.main.async {
             self.updateState()
         }
-    }
-    
-    func replace(view: UIView) {
-        contentTopToFrame?.isActive = false
-        contentTopToContent?.isActive = false
-        contentBottomToFrame?.isActive = false
-        contentBottomToView?.isActive = false
-        
-        self.view.removeFromSuperview()
-        add(view: view)
-        updateState()
-    }
-    
-    private func add(view: UIView) {
-        self.view = view
-        addSubview(view)
-        
-        NSLayoutConstraint.activate([
-            view.leadingAnchor.constraint(equalTo: leadingAnchor),
-            view.trailingAnchor.constraint(equalTo: trailingAnchor),
-            view.widthAnchor.constraint(equalTo: frameLayoutGuide.widthAnchor),
-            view.heightAnchor.constraint(equalTo: frameLayoutGuide.heightAnchor),
-        ])
-        
-        contentTopToFrame = view.topAnchor.constraint(equalTo: contentLayoutGuide.topAnchor)
-        contentTopToContent = view.topAnchor.constraint(equalTo: topAnchor)
-        contentBottomToFrame = view.bottomAnchor.constraint(equalTo: contentLayoutGuide.bottomAnchor)
-        contentBottomToView = view.bottomAnchor.constraint(equalTo: bottomView.topAnchor)
     }
     
     required init?(coder: NSCoder) {

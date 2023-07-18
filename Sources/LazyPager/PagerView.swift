@@ -12,14 +12,15 @@ import SwiftUI
 protocol ViewLoader: AnyObject {
     
     associatedtype Element
+    associatedtype Content: View
     
-    func loadView(at: Int) -> ZoomableView<Element>?
-    func replaceViewIfNeeded(for zoomableView: ZoomableView<Element>)
+    func loadView(at: Int) -> ZoomableView<Element, Content>?
+    func updateHostedView(for zoomableView: ZoomableView<Element, Content>)
 }
 
-class PagerView<Element, Loader: ViewLoader>: UIScrollView, UIScrollViewDelegate where Loader.Element == Element {
+class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScrollViewDelegate where Loader.Element == Element, Loader.Content == Content {
     var isFirstLoad = false
-    var loadedViews = [ZoomableView<Element>]()
+    var loadedViews = [ZoomableView<Element, Content>]()
     var config: Config
     weak var viewLoader: Loader?
     
@@ -97,7 +98,7 @@ class PagerView<Element, Loader: ViewLoader>: UIScrollView, UIScrollViewDelegate
     }
     
     
-    func addSubview(_ zoomView: ZoomableView<Element>) {
+    func addSubview(_ zoomView: ZoomableView<Element, Content>) {
         super.addSubview(zoomView)
         NSLayoutConstraint.activate([
             zoomView.widthAnchor.constraint(equalTo: frameLayoutGuide.widthAnchor),
@@ -105,7 +106,7 @@ class PagerView<Element, Loader: ViewLoader>: UIScrollView, UIScrollViewDelegate
         ])
     }
     
-    func addFirstView(_ zoomView: ZoomableView<Element>) {
+    func addFirstView(_ zoomView: ZoomableView<Element, Content>) {
         zoomView.leadingConstraint = zoomView.leadingAnchor.constraint(equalTo: leadingAnchor)
         zoomView.trailingConstraint = zoomView.trailingAnchor.constraint(equalTo: trailingAnchor)
         zoomView.leadingConstraint?.isActive = true
@@ -165,11 +166,11 @@ class PagerView<Element, Loader: ViewLoader>: UIScrollView, UIScrollViewDelegate
     
     func reloadViews() {
         for view in loadedViews {
-            viewLoader?.replaceViewIfNeeded(for: view)
+            viewLoader?.updateHostedView(for: view)
         }
     }
     
-    func remove(view: ZoomableView<Element>) {
+    func remove(view: ZoomableView<Element, Content>) {
         let index = view.index
         loadedViews.removeAll { $0.index == view.index }
         view.removeFromSuperview()
