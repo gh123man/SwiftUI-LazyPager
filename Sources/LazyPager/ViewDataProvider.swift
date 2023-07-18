@@ -9,23 +9,23 @@ import Foundation
 import SwiftUI
 import UIKit
 
-public class ViewDataProvider<Content: View, DataType> {
-    private var viewLoader: (DataType) -> Content
+public class ViewDataProvider<Content: View, Element: Equatable>: ViewLoader {
+    private var viewLoader: (Element) -> Content
     
-    var data: [DataType]
+    var data: [Element]
     var config: Config
     
-    var pagerView: PagerView
+    var pagerView: PagerView<Element, ViewDataProvider>
     
     var contentTopToFrame: NSLayoutConstraint!
     var contentTopToContent: NSLayoutConstraint!
     var contentBottomToFrame: NSLayoutConstraint!
     
     
-    init(data: [DataType],
+    init(data: [Element],
          page: Binding<Int>,
          config: Config,
-         viewLoader: @escaping (DataType) -> Content) {
+         viewLoader: @escaping (Element) -> Content) {
         
         self.data = data
         self.viewLoader = viewLoader
@@ -39,16 +39,33 @@ public class ViewDataProvider<Content: View, DataType> {
     func goToPage(_ page: Int) {
         pagerView.goToPage(page)
     }
-}
-
-extension ViewDataProvider: ViewLoader {
-    func loadView(at index: Int) -> ZoomableView? {
+    
+    func reloadViews() {
+        pagerView.reloadViews()
+        pagerView.computeViewState()
+    }
+//}
+//
+//extension ViewDataProvider: ViewLoader {
+    func loadView(at index: Int) -> ZoomableView<Element>? {
         guard let dta = data[safe: index] else { return nil }
         guard let loadedContent = UIHostingController(rootView: viewLoader(dta)).view else { return nil }
         
         loadedContent.translatesAutoresizingMaskIntoConstraints = false
         loadedContent.backgroundColor = .clear
         
-        return ZoomableView(view: loadedContent, index: index, config: config)
+        return ZoomableView(view: loadedContent, index: index, data: dta, config: config)
+    }
+    
+    func replaceViewIfNeeded(for zoomableView: ZoomableView<Element>) {
+        if data[zoomableView.index] == zoomableView.data { return }
+        
+        guard let dta = data[safe: zoomableView.index] else { return }
+        guard let loadedContent = UIHostingController(rootView: viewLoader(dta)).view else { return }
+        
+        loadedContent.translatesAutoresizingMaskIntoConstraints = false
+        loadedContent.backgroundColor = .clear
+        
+        zoomableView.replace(view: loadedContent)
     }
 }

@@ -10,14 +10,18 @@ import UIKit
 import SwiftUI
 
 protocol ViewLoader: AnyObject {
-    func loadView(at: Int) -> ZoomableView?
+    
+    associatedtype Element
+    
+    func loadView(at: Int) -> ZoomableView<Element>?
+    func replaceViewIfNeeded(for zoomableView: ZoomableView<Element>)
 }
 
-class PagerView: UIScrollView {
+class PagerView<Element, Loader: ViewLoader>: UIScrollView, UIScrollViewDelegate where Loader.Element == Element {
     var isFirstLoad = false
-    var loadedViews = [ZoomableView]()
+    var loadedViews = [ZoomableView<Element>]()
     var config: Config
-    weak var viewLoader: ViewLoader?
+    weak var viewLoader: Loader?
     
     private var internalIndex: Int = 0
     var page: Binding<Int>
@@ -93,7 +97,7 @@ class PagerView: UIScrollView {
     }
     
     
-    func addSubview(_ zoomView: ZoomableView) {
+    func addSubview(_ zoomView: ZoomableView<Element>) {
         super.addSubview(zoomView)
         NSLayoutConstraint.activate([
             zoomView.widthAnchor.constraint(equalTo: frameLayoutGuide.widthAnchor),
@@ -101,7 +105,7 @@ class PagerView: UIScrollView {
         ])
     }
     
-    func addFirstView(_ zoomView: ZoomableView) {
+    func addFirstView(_ zoomView: ZoomableView<Element>) {
         zoomView.leadingConstraint = zoomView.leadingAnchor.constraint(equalTo: leadingAnchor)
         zoomView.trailingConstraint = zoomView.trailingAnchor.constraint(equalTo: trailingAnchor)
         zoomView.leadingConstraint?.isActive = true
@@ -159,7 +163,13 @@ class PagerView: UIScrollView {
         
     }
     
-    func remove(view: ZoomableView) {
+    func reloadViews() {
+        for view in loadedViews {
+            viewLoader?.replaceViewIfNeeded(for: view)
+        }
+    }
+    
+    func remove(view: ZoomableView<Element>) {
         let index = view.index
         loadedViews.removeAll { $0.index == view.index }
         view.removeFromSuperview()
@@ -215,9 +225,8 @@ class PagerView: UIScrollView {
         contentOffset.x = CGFloat(index) * frame.size.width
         internalIndex = index
     }
-}
-
-extension PagerView: UIScrollViewDelegate {
+    
+    // MARK: UISCrollVieDelegate methods
     
     public func scrollViewDidScroll(_ scrollView: UIScrollView) {
         guard let visible = loadedViews.first(where: { isSubviewVisible($0, in: scrollView) }) else { return }

@@ -58,22 +58,22 @@ public struct Config {
     public var pinchGestureEnableOffset: Double = 10
 }
 
-public struct LazyPager<Content: View, DataType> {
-    private var viewLoader: (DataType) -> Content
-    private var data: [DataType]
+public struct LazyPager<Element: Equatable, Content: View> {
+    private var viewLoader: (Element) -> Content
+    private var data: [Element]
     private var page: Binding<Int>
     
     var config = Config()
     
-    public init(data: [DataType],
-         page: Binding<Int>,
-         content: @escaping (DataType) -> Content) {
-        self.data = data
+    public init<DataType: RandomAccessCollection>(data: DataType,
+                page: Binding<Int>,
+                @ViewBuilder content: @escaping (Element) -> Content) where DataType.Index == Int, DataType.Element == Element {
+        self.data = Array(data)
         self.page = page
         self.viewLoader = content
     }
 
-    public class Coordinator: ViewDataProvider<Content, DataType> { }
+    public class Coordinator: ViewDataProvider<Content, Element> { }
 }
 
 public extension LazyPager {
@@ -120,5 +120,8 @@ extension LazyPager: UIViewRepresentable {
                            viewLoader: viewLoader)
     }
 
-    public func updateUIView(_ uiView: UIScrollView, context: Context) {}
+    public func updateUIView(_ uiView: UIScrollView, context: Context) {
+        context.coordinator.data = data
+        context.coordinator.reloadViews()
+    }
 }
