@@ -58,22 +58,22 @@ public struct Config {
     public var pinchGestureEnableOffset: Double = 10
 }
 
-public struct LazyPager<Element, Content: View> {
+public struct LazyPager<Element, DataCollecton: RandomAccessCollection, Content: View> where DataCollecton.Index == Int, DataCollecton.Element == Element {
     private var viewLoader: (Element) -> Content
-    private var data: [Element]
+    private var data: DataCollecton
     private var page: Binding<Int>
     
     var config = Config()
     
-    public init<DataType: RandomAccessCollection>(data: DataType,
+    public init(data: DataCollecton,
                 page: Binding<Int>,
-                @ViewBuilder content: @escaping (Element) -> Content) where DataType.Index == Int, DataType.Element == Element {
-        self.data = Array(data)
+                @ViewBuilder content: @escaping (Element) -> Content)  {
+        self.data = data
         self.page = page
         self.viewLoader = content
     }
 
-    public class Coordinator: ViewDataProvider<Content, Element> { }
+    public class Coordinator: ViewDataProvider<Content, DataCollecton, Element> { }
 }
 
 public extension LazyPager {

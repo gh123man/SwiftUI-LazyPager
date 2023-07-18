@@ -9,10 +9,10 @@ import Foundation
 import SwiftUI
 import UIKit
 
-public class ViewDataProvider<Content: View, Element>: ViewLoader {
+public class ViewDataProvider<Content: View, DataCollecton: RandomAccessCollection, Element>: ViewLoader where DataCollecton.Index == Int, DataCollecton.Element == Element {
     private var viewLoader: (Element) -> Content
     
-    var data: [Element]
+    var data: DataCollecton
     var config: Config
     
     var pagerView: PagerView<Element, ViewDataProvider, Content>
@@ -22,7 +22,7 @@ public class ViewDataProvider<Content: View, Element>: ViewLoader {
     var contentBottomToFrame: NSLayoutConstraint!
     
     
-    init(data: [Element],
+    init(data: DataCollecton,
          page: Binding<Int>,
          config: Config,
          viewLoader: @escaping (Element) -> Content) {
