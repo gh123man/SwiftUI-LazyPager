@@ -57,6 +57,11 @@ var body: some View {
             print("tap")
         }
 
+        // Get notified when to load more content
+        .shouldLoadMore {
+            data.append("foobar")
+        }
+
         // Set the background color with the drag opacity control
         .background(.black.opacity(opacity))
 
@@ -78,6 +83,7 @@ For a full working example, [open the sample project](https://github.com/gh123ma
 - Lazy loaded views are disposed when they are outside of the pre-load frame to conserve resources. 
 - Enable zooming and panning with `.zoomable(min: CGFloat, max: CGFloat)`
 - Double tap to zoom is also supported.
+- Notifies when to load more content with `.shouldLoadMore`
 - Works with `.ignoresSafeArea()` (or not) to get a true full screen view.
 - Drag to dismiss is supported with `.onDismiss` - Supply a binding opacity value to control the background opacity during the transition. 
 - Tap events are handled internally, so use `.onTap` to handle single taps (useful for hiding and showing UI)

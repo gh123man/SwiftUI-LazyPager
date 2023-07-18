@@ -21,6 +21,10 @@ public class ViewDataProvider<Content: View, DataCollecton: RandomAccessCollecti
     var contentTopToContent: NSLayoutConstraint!
     var contentBottomToFrame: NSLayoutConstraint!
     
+    var dataCount: Int {
+        return data.count
+    }
+    
     
     init(data: DataCollecton,
          page: Binding<Int>,

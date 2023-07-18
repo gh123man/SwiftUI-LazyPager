@@ -9,6 +9,10 @@ import Foundation
 import UIKit
 import SwiftUI
 
+public enum LoadMore {
+    case lastElement(minus: Int = 0)
+}
+
 public enum DoubleTap {
     case disabled
     case scale(CGFloat)
@@ -32,6 +36,12 @@ public struct Config {
     
     /// Called when tapping once
     public var tapCallback: (() -> ())?
+    
+    /// The offset used to trigger load loadMoreCallback
+    public var loadMoreOn: LoadMore = .lastElement(minus: 3)
+    
+    /// Called when more content should be loaded
+    public var loadMoreCallback: (() -> ())?
     
     /// Advanced settings (only accessible via .settings)
     
@@ -87,6 +97,13 @@ public extension LazyPager {
     func onTap(_ callback: @escaping () -> ()) -> LazyPager {
         var this = self
         this.config.tapCallback = callback
+        return this
+    }
+    
+    func shouldLoadMore(on: LoadMore = .lastElement(minus: 3), _ callback: @escaping () -> ()) -> LazyPager {
+        var this = self
+        this.config.loadMoreOn = on
+        this.config.loadMoreCallback = callback
         return this
     }
     

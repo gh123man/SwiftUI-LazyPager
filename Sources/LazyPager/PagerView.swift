@@ -14,6 +14,8 @@ protocol ViewLoader: AnyObject {
     associatedtype Element
     associatedtype Content: View
     
+    var dataCount: Int { get }
+    
     func loadView(at: Int) -> ZoomableView<Element, Content>?
     func updateHostedView(for zoomableView: ZoomableView<Element, Content>)
 }
@@ -31,6 +33,7 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
         didSet {
             computeViewState()
             page.wrappedValue = currentIndex
+            loadMoreIfNeeded()
         }
     }
     
@@ -225,6 +228,18 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
         }
         contentOffset.x = CGFloat(index) * frame.size.width
         internalIndex = index
+    }
+    
+    func loadMoreIfNeeded() {
+        guard let loadMoreCallback = config.loadMoreCallback else { return }
+        guard case let .lastElement(offset) = config.loadMoreOn else { return }
+        guard let viewLoader = viewLoader else { return }
+        
+        if currentIndex + offset >= viewLoader.dataCount - 1 {
+            DispatchQueue.main.async {
+                loadMoreCallback()
+            }
+        }
     }
     
     // MARK: UISCrollVieDelegate methods

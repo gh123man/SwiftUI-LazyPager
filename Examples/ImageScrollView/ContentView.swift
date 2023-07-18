@@ -10,10 +10,6 @@ import LazyPager
 
 
 struct Foo {
-//    static func == (lhs: Foo, rhs: Foo) -> Bool {
-//        return lhs.img == rhs.img
-//    }
-
     let id = UUID()
     var img: String
 }
@@ -24,19 +20,8 @@ struct ContentView: View {
         Foo(img: "nora1"),
         Foo(img: "nora2"),
         Foo(img: "nora3"),
-//        "nora4",
-//        "nora5",
-//        "nora6",
     ]
     
-//    @State var data = [
-//        "nora1",
-//        "nora2",
-//        "nora3",
-//        "nora5",
-//        "nora6",
-//    ]
-//
     @State var show = true
     @State var opacity: CGFloat = 1
     @State var index = 0
@@ -58,14 +43,13 @@ struct ContentView: View {
                 .onTap {
                     print("tap")
                 }
+                .shouldLoadMore(on: .lastElement(minus: 2)) {
+                    data.append(Foo(img: "nora4"))
+                }
                 .background(.black.opacity(opacity))
                 .background(ClearFullScreenBackground())
                 .ignoresSafeArea()
                 VStack {
-//                    Text(data.description)
-//                    Button("prepend") {
-//                        data.insert("nora4", at: 0)
-//                    }
                     Button("append") {
                         data.append(Foo(img: "nora4"))
                     }
