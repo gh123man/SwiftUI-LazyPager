@@ -7,11 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		D353FB592A52174B00C04ABE /* ImageScrollViewApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D353FB582A52174B00C04ABE /* ImageScrollViewApp.swift */; };
+		D353FB592A52174B00C04ABE /* LazyPagerExampleApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D353FB582A52174B00C04ABE /* LazyPagerExampleApp.swift */; };
 		D353FB5B2A52174B00C04ABE /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D353FB5A2A52174B00C04ABE /* ContentView.swift */; };
 		D353FB5D2A52174C00C04ABE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D353FB5C2A52174C00C04ABE /* Assets.xcassets */; };
 		D353FB602A52174C00C04ABE /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D353FB5F2A52174C00C04ABE /* Preview Assets.xcassets */; };
-		D353FB6A2A52174C00C04ABE /* ImageScrollViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D353FB692A52174C00C04ABE /* ImageScrollViewTests.swift */; };
+		D353FB6A2A52174C00C04ABE /* LazyPagerExampleAppTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D353FB692A52174C00C04ABE /* LazyPagerExampleAppTests.swift */; };
 		D353FB742A52174C00C04ABE /* ImageScrollViewUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D353FB732A52174C00C04ABE /* ImageScrollViewUITests.swift */; };
 		D353FB762A52174C00C04ABE /* ImageScrollViewUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D353FB752A52174C00C04ABE /* ImageScrollViewUITestsLaunchTests.swift */; };
 		D367DA132A59E930004497D4 /* LazyPager in Frameworks */ = {isa = PBXBuildFile; productRef = D367DA122A59E930004497D4 /* LazyPager */; };
@@ -36,12 +36,12 @@
 
 /* Begin PBXFileReference section */
 		D353FB552A52174B00C04ABE /* LazyPagerExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LazyPagerExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		D353FB582A52174B00C04ABE /* ImageScrollViewApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageScrollViewApp.swift; sourceTree = "<group>"; };
+		D353FB582A52174B00C04ABE /* LazyPagerExampleApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LazyPagerExampleApp.swift; sourceTree = "<group>"; };
 		D353FB5A2A52174B00C04ABE /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		D353FB5C2A52174C00C04ABE /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		D353FB5F2A52174C00C04ABE /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		D353FB652A52174C00C04ABE /* LazyPagerExampleTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LazyPagerExampleTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		D353FB692A52174C00C04ABE /* ImageScrollViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageScrollViewTests.swift; sourceTree = "<group>"; };
+		D353FB692A52174C00C04ABE /* LazyPagerExampleAppTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LazyPagerExampleAppTests.swift; sourceTree = "<group>"; };
 		D353FB6F2A52174C00C04ABE /* LazyPagerExampleUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LazyPagerExampleUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D353FB732A52174C00C04ABE /* ImageScrollViewUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageScrollViewUITests.swift; sourceTree = "<group>"; };
 		D353FB752A52174C00C04ABE /* ImageScrollViewUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageScrollViewUITestsLaunchTests.swift; sourceTree = "<group>"; };
@@ -78,9 +78,9 @@
 			isa = PBXGroup;
 			children = (
 				D367DA0F2A59E925004497D4 /* Packages */,
-				D353FB572A52174B00C04ABE /* ImageScrollView */,
-				D353FB682A52174C00C04ABE /* ImageScrollViewTests */,
-				D353FB722A52174C00C04ABE /* ImageScrollViewUITests */,
+				D353FB572A52174B00C04ABE /* LazyPagerExampleApp */,
+				D353FB682A52174C00C04ABE /* LazyPagerExampleAppTests */,
+				D353FB722A52174C00C04ABE /* LazyPagerExampleAppUITests */,
 				D353FB562A52174B00C04ABE /* Products */,
 				D367DA112A59E930004497D4 /* Frameworks */,
 			);
@@ -96,15 +96,15 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		D353FB572A52174B00C04ABE /* ImageScrollView */ = {
+		D353FB572A52174B00C04ABE /* LazyPagerExampleApp */ = {
 			isa = PBXGroup;
 			children = (
-				D353FB582A52174B00C04ABE /* ImageScrollViewApp.swift */,
+				D353FB582A52174B00C04ABE /* LazyPagerExampleApp.swift */,
 				D353FB5A2A52174B00C04ABE /* ContentView.swift */,
 				D353FB5C2A52174C00C04ABE /* Assets.xcassets */,
 				D353FB5E2A52174C00C04ABE /* Preview Content */,
 			);
-			path = ImageScrollView;
+			path = LazyPagerExampleApp;
 			sourceTree = "<group>";
 		};
 		D353FB5E2A52174C00C04ABE /* Preview Content */ = {
@@ -115,21 +115,21 @@
 			path = "Preview Content";
 			sourceTree = "<group>";
 		};
-		D353FB682A52174C00C04ABE /* ImageScrollViewTests */ = {
+		D353FB682A52174C00C04ABE /* LazyPagerExampleAppTests */ = {
 			isa = PBXGroup;
 			children = (
-				D353FB692A52174C00C04ABE /* ImageScrollViewTests.swift */,
+				D353FB692A52174C00C04ABE /* LazyPagerExampleAppTests.swift */,
 			);
-			path = ImageScrollViewTests;
+			path = LazyPagerExampleAppTests;
 			sourceTree = "<group>";
 		};
-		D353FB722A52174C00C04ABE /* ImageScrollViewUITests */ = {
+		D353FB722A52174C00C04ABE /* LazyPagerExampleAppUITests */ = {
 			isa = PBXGroup;
 			children = (
 				D353FB732A52174C00C04ABE /* ImageScrollViewUITests.swift */,
 				D353FB752A52174C00C04ABE /* ImageScrollViewUITestsLaunchTests.swift */,
 			);
-			path = ImageScrollViewUITests;
+			path = LazyPagerExampleAppUITests;
 			sourceTree = "<group>";
 		};
 		D367DA0F2A59E925004497D4 /* Packages */ = {
@@ -281,7 +281,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D353FB5B2A52174B00C04ABE /* ContentView.swift in Sources */,
-				D353FB592A52174B00C04ABE /* ImageScrollViewApp.swift in Sources */,
+				D353FB592A52174B00C04ABE /* LazyPagerExampleApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -289,7 +289,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D353FB6A2A52174C00C04ABE /* ImageScrollViewTests.swift in Sources */,
+				D353FB6A2A52174C00C04ABE /* LazyPagerExampleAppTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -439,7 +439,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"ImageScrollView/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"LazyPagerExampleApp/Preview Content\"";
 				DEVELOPMENT_TEAM = BX46265734;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -468,7 +468,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"ImageScrollView/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"LazyPagerExampleApp/Preview Content\"";
 				DEVELOPMENT_TEAM = BX46265734;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
