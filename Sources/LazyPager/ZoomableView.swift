@@ -1,6 +1,6 @@
 //
 //  ZoomableView.swift
-//  ImageScrollView
+//  LazyPager
 //
 //  Created by Brian Floersch on 7/4/23.
 //
@@ -20,6 +20,7 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate {
     
     var config: Config
     var bottomView: UIView
+    
     var allowScroll: Bool = true {
         didSet {
             if allowScroll {
@@ -44,12 +45,14 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate {
     var isAnimating = false
     var isZoomHappening = false
     var lastInset: CGFloat = 0
-    var view: UIView {
-        return hostingController.view
-    }
+    
     var hostingController: UIHostingController<Content>
     var index: Int
     var data: Element
+    
+    var view: UIView {
+        return hostingController.view
+    }
     
     init(hostingController: UIHostingController<Content>, index: Int, data: Element, config: Config) {
         self.index = index
@@ -57,7 +60,7 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate {
         self.data = data
         self.config = config
         let v = UIView()
-        bottomView = v
+        self.bottomView = v
         
         super.init(frame: .zero)
         
@@ -110,7 +113,7 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate {
         addGestureRecognizer(singleTapGesture)
         
         if case .scale = config.doubleTapSetting {
-            let doubleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(doubleTap(_:)))
+            let doubleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(onDoubleTap(_:)))
             doubleTapRecognizer.numberOfTapsRequired = 2
             doubleTapRecognizer.numberOfTouchesRequired = 1
             addGestureRecognizer(doubleTapRecognizer)
@@ -131,7 +134,7 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate {
         config.tapCallback?()
     }
     
-    @objc func doubleTap(_ recognizer:UITapGestureRecognizer) {
+    @objc func onDoubleTap(_ recognizer:UITapGestureRecognizer) {
         if case let .scale(scale) = config.doubleTapSetting {
             let pointInView = recognizer.location(in: view)
             zoom(at: pointInView, scale: scale)

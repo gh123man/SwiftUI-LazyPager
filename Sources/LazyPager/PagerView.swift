@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  PagerView.swift
 //  
 //
 //  Created by Brian Floersch on 7/8/23.
@@ -21,6 +21,7 @@ protocol ViewLoader: AnyObject {
 }
 
 class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScrollViewDelegate where Loader.Element == Element, Loader.Content == Content {
+    
     var isFirstLoad = false
     var loadedViews = [ZoomableView<Element, Content>]()
     var config: Config
@@ -97,7 +98,7 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
         self.removeOutOfFrameViews()
         
         // Debug
-//        print(self.loadedViews.map { $0.index })
+        // print(self.loadedViews.map { $0.index })
     }
     
     
@@ -117,9 +118,7 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
     }
     
     func appendView(at index: Int) {
-        guard let zoomView = viewLoader?.loadView(at: index) else {
-            return
-        }
+        guard let zoomView = viewLoader?.loadView(at: index) else { return }
         
         addSubview(zoomView)
         
@@ -140,9 +139,7 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
     }
     
     func prependView(at index: Int) {
-        guard let zoomView = viewLoader?.loadView(at: index) else {
-            return
-        }
+        guard let zoomView = viewLoader?.loadView(at: index) else { return }
         
         addSubview(zoomView)
         
@@ -164,7 +161,6 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
         loadedViews.insert(zoomView, at: 0)
         contentOffset.x += frame.size.width
         internalIndex += 1
-        
     }
     
     func reloadViews() {
@@ -223,9 +219,8 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
     }
     
     func goToPage(_ page: Int) {
-        guard let index = loadedViews.firstIndex(where: { $0.index == page }) else {
-            return
-        }
+        guard let index = loadedViews.firstIndex(where: { $0.index == page }) else { return }
+        
         contentOffset.x = CGFloat(index) * frame.size.width
         internalIndex = index
     }

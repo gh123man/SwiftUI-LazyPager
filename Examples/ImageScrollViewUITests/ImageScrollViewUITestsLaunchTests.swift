@@ -1,13 +1,13 @@
 //
-//  ImageScrollViewUITestsLaunchTests.swift
-//  ImageScrollViewUITests
+//  LazyPagerUITestsLaunchTests.swift
+//  LazyPagerUITests
 //
 //  Created by Brian Floersch on 7/2/23.
 //
 
 import XCTest
 
-final class ImageScrollViewUITestsLaunchTests: XCTestCase {
+final class LazyPagerUITestsLaunchTests: XCTestCase {
 
     override class var runsForEachTargetApplicationUIConfiguration: Bool {
         true

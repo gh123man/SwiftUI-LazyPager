@@ -1,6 +1,6 @@
 //
-//  ZoomableScrollView.swift
-//  ImageScrollView
+//  LazyPager.swift
+//  LazyPager
 //
 //  Created by Brian Floersch on 7/6/23.
 //

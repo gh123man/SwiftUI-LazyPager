@@ -1,6 +1,6 @@
 //
 //  ContentView.swift
-//  ImageScrollView
+//  LazyPager
 //
 //  Created by Brian Floersch on 7/2/23.
 //

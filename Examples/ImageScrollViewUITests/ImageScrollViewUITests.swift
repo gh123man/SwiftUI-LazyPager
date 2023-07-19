@@ -1,13 +1,13 @@
 //
-//  ImageScrollViewUITests.swift
-//  ImageScrollViewUITests
+//  LazyPagerUITests.swift
+//  LazyPagerUITests
 //
 //  Created by Brian Floersch on 7/2/23.
 //
 
 import XCTest
 
-final class ImageScrollViewUITests: XCTestCase {
+final class LazyPagerUITests: XCTestCase {
 
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.
