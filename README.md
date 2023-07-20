@@ -1,6 +1,6 @@
 # LazyPager for SwiftUI
 
-A buttery smooth, lazy loaded, panning, zooming, and gesture dismissable pager view for SwiftUI. 
+A buttery smooth, lazy loaded, panning, zooming, and gesture dismissible pager view for SwiftUI. 
 
 The goal with this library is to expose a simple SwiftUI interface for a fluid and seamless content viewer.
 
