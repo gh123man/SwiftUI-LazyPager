@@ -74,7 +74,7 @@ var body: some View {
 }
 ```
 
-For a full working example, [open the sample project](https://github.com/gh123man/LazyPager/tree/master/Examples) in the examples folder, or [check out the code here](https://github.com/gh123man/LazyPager/blob/master/Examples/ImageScrollView/ContentView.swift).
+For a full working example, [open the sample project](https://github.com/gh123man/LazyPager/tree/master/Examples) in the examples folder, or [check out the code here]([https://github.com/gh123man/LazyPager/blob/master/Examples/ImageScrollView/ContentView.swift](https://github.com/gh123man/LazyPager/blob/master/Examples/LazyPagerExampleApp/ContentView.swift)).
 
 # Features
 
@@ -87,7 +87,7 @@ For a full working example, [open the sample project](https://github.com/gh123ma
 - Works with `.ignoresSafeArea()` (or not) to get a true full screen view.
 - Drag to dismiss is supported with `.onDismiss` - Supply a binding opacity value to control the background opacity during the transition. 
 - Tap events are handled internally, so use `.onTap` to handle single taps (useful for hiding and showing UI)
-- Use `.settings` to [modify advanced settings](https://github.com/gh123man/LazyPager/blob/master/Sources/LazyPager/LazyPager.swift#L17)
+- Use `.settings` to [modify advanced settings]([https://github.com/gh123man/LazyPager/blob/master/Sources/LazyPager/LazyPager.swift#L17](https://github.com/gh123man/LazyPager/blob/master/Sources/LazyPager/LazyPager.swift#L46))
 
 
 # Detailed usage
