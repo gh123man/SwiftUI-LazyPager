@@ -27,7 +27,6 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
     var config: Config
     weak var viewLoader: Loader?
     
-    private var internalIndex: Int = 0
     var isRotating = false
     var page: Binding<Int>
     
@@ -62,8 +61,9 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
             goToPage(currentIndex)
             isFirstLoad = true
         }
+        
         if isRotating {
-            contentOffset.x = CGFloat(currentIndex) * frame.size.width
+            goToPage(currentIndex)
         }
     }
     
@@ -102,7 +102,7 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
         self.removeOutOfFrameViews()
         
         // Debug
-        // print(self.loadedViews.map { $0.index })
+//         print(self.loadedViews.map { $0.index })
     }
     
     
@@ -164,7 +164,6 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
         
         loadedViews.insert(zoomView, at: 0)
         contentOffset.x += frame.size.width
-        internalIndex += 1
     }
     
     func reloadViews() {
@@ -186,7 +185,6 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
             
             if firstView.index > index {
                 contentOffset.x -= frame.size.width
-                internalIndex -= 1
             }
         }
         
@@ -224,9 +222,7 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
     
     func goToPage(_ page: Int) {
         guard let index = loadedViews.firstIndex(where: { $0.index == page }) else { return }
-        
         contentOffset.x = CGFloat(index) * frame.size.width
-        internalIndex = index
     }
     
     func loadMoreIfNeeded() {
@@ -245,10 +241,8 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
     
     public func scrollViewDidScroll(_ scrollView: UIScrollView) {
         guard let visible = loadedViews.first(where: { isSubviewVisible($0, in: scrollView) }) else { return }
-        guard let newIndex = loadedViews.firstIndex(where: { $0.index == visible.index }) else { return }
-        if newIndex != internalIndex, !scrollView.isTracking, !isRotating  {
+        if !scrollView.isTracking, !isRotating  {
             currentIndex = visible.index
-            internalIndex = newIndex
         }
         resizeOutOfBoundsViews()
     }
