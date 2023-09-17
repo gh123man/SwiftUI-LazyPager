@@ -74,17 +74,9 @@ public class ViewDataProvider<Content: View, DataCollecton: RandomAccessCollecti
     public override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
         
-        print("Start rotation")
-//        let page = pagerView.currentIndex
         pagerView.isRotating = true
-        coordinator.animate(alongsideTransition: { context in
-            
-        }, completion: { context in
-            print("finish rotation")
+        coordinator.animate(alongsideTransition: { context in }, completion: { context in
             self.pagerView.isRotating = false
-//            DispatchQueue.main.async {
-//            self.pagerView.goToPage(page)
-//            }
         })
     }
 }
