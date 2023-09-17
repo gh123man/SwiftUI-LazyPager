@@ -162,7 +162,9 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate {
                     let fadeOffset = normalize(from: 0, at: absoluteDragOffset, to: config.fullFadeOnDragAt)
                     config.backgroundOpacity?.wrappedValue = 1 - fadeOffset
                 } else {
-                    config.backgroundOpacity?.wrappedValue = 1
+                    DispatchQueue.main.async {
+                        self.config.backgroundOpacity?.wrappedValue = 1
+                    }
                 }
             }
             
@@ -179,6 +181,12 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate {
         let x = point.x - (w * 0.5)
         let y = point.y - (h * 0.5)
         zoom(to: CGRect(x: x, y: y, width: w, height: h), animated: true)
+    }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        
+        scrollViewDidZoom(self)
     }
     
     // MARK: UIScrollViewDelegate methods

@@ -9,7 +9,7 @@ import Foundation
 import SwiftUI
 import UIKit
 
-public class ViewDataProvider<Content: View, DataCollecton: RandomAccessCollection, Element>: ViewLoader where DataCollecton.Index == Int, DataCollecton.Element == Element {
+public class ViewDataProvider<Content: View, DataCollecton: RandomAccessCollection, Element>: UIViewController, ViewLoader where DataCollecton.Index == Int, DataCollecton.Element == Element {
     
     private var viewLoader: (Element) -> Content
     var data: DataCollecton
@@ -30,9 +30,15 @@ public class ViewDataProvider<Content: View, DataCollecton: RandomAccessCollecti
         self.viewLoader = viewLoader
         self.config = config
         self.pagerView = PagerView(page: page, config: config)
+        
+        super.init(nibName: nil, bundle: nil)
         self.pagerView.viewLoader = self
         
         pagerView.computeViewState()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
     
     func goToPage(_ page: Int) {
@@ -58,4 +64,28 @@ public class ViewDataProvider<Content: View, DataCollecton: RandomAccessCollecti
         
         zoomableView.hostingController.rootView = viewLoader(dta)
     }
+    
+    // MARK: UIViewController
+    
+    public override func loadView() {
+        self.view = pagerView
+    }
+    
+    public override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+        
+        print("Start rotation")
+//        let page = pagerView.currentIndex
+        pagerView.isRotating = true
+        coordinator.animate(alongsideTransition: { context in
+            
+        }, completion: { context in
+            print("finish rotation")
+            self.pagerView.isRotating = false
+//            DispatchQueue.main.async {
+//            self.pagerView.goToPage(page)
+//            }
+        })
+    }
 }
+

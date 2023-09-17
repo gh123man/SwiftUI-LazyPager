@@ -122,12 +122,13 @@ public extension LazyPager {
     }
 }
 
-extension LazyPager: UIViewRepresentable {
-    public func makeUIView(context: Context) -> UIScrollView {
+extension LazyPager: UIViewControllerRepresentable {
+    
+    public func makeUIViewController(context: Context) -> Coordinator {
         DispatchQueue.main.async {
             context.coordinator.goToPage(page.wrappedValue)
         }
-        return context.coordinator.pagerView
+        return context.coordinator
     }
     
     public func makeCoordinator() -> Coordinator {
@@ -137,7 +138,7 @@ extension LazyPager: UIViewRepresentable {
                            viewLoader: viewLoader)
     }
 
-    public func updateUIView(_ uiView: UIScrollView, context: Context) {
+    public func updateUIViewController(_ uiViewController: Coordinator, context: Context) {
         context.coordinator.data = data
         context.coordinator.reloadViews()
     }

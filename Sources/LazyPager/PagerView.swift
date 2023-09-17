@@ -28,6 +28,7 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
     weak var viewLoader: Loader?
     
     private var internalIndex: Int = 0
+    var isRotating = false
     var page: Binding<Int>
     
     var currentIndex: Int = 0 {
@@ -60,6 +61,9 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
         if !isFirstLoad {
             goToPage(currentIndex)
             isFirstLoad = true
+        }
+        if isRotating {
+            contentOffset.x = CGFloat(currentIndex) * frame.size.width
         }
     }
     
@@ -242,7 +246,7 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
     public func scrollViewDidScroll(_ scrollView: UIScrollView) {
         guard let visible = loadedViews.first(where: { isSubviewVisible($0, in: scrollView) }) else { return }
         guard let newIndex = loadedViews.firstIndex(where: { $0.index == visible.index }) else { return }
-        if newIndex != internalIndex, !scrollView.isTracking {
+        if newIndex != internalIndex, !scrollView.isTracking, !isRotating  {
             currentIndex = visible.index
             internalIndex = newIndex
         }
