@@ -49,7 +49,9 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
         backgroundColor = .clear
         isPagingEnabled = true
         delegate = self
+        
     }
+    
     
     required init?(coder: NSCoder) {
         fatalError("Not implemented")
@@ -60,9 +62,7 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
         if !isFirstLoad {
             goToPage(currentIndex)
             isFirstLoad = true
-        }
-        
-        if isRotating {
+        } else if isRotating {
             goToPage(currentIndex)
         }
     }

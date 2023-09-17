@@ -77,6 +77,9 @@ public class ViewDataProvider<Content: View, DataCollecton: RandomAccessCollecti
         pagerView.isRotating = true
         coordinator.animate(alongsideTransition: { context in }, completion: { context in
             self.pagerView.isRotating = false
+            DispatchQueue.main.async {
+                self.pagerView.goToPage(self.pagerView.currentIndex)
+            }
         })
     }
 }
