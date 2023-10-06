@@ -11,7 +11,7 @@ import UIKit
 
 public class ViewDataProvider<Content: View, DataCollecton: RandomAccessCollection, Element>: UIViewController, ViewLoader where DataCollecton.Index == Int, DataCollecton.Element == Element {
     
-    private var viewLoader: (Element) -> Content
+    var viewLoader: (Element) -> Content
     var data: DataCollecton
     var config: Config
     var pagerView: PagerView<Element, ViewDataProvider, Content>

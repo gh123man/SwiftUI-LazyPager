@@ -139,7 +139,8 @@ extension LazyPager: UIViewControllerRepresentable {
     }
 
     public func updateUIViewController(_ uiViewController: Coordinator, context: Context) {
-        context.coordinator.data = data
-        context.coordinator.reloadViews()
+        uiViewController.viewLoader = viewLoader
+        uiViewController.data = data
+        uiViewController.reloadViews()
     }
 }
