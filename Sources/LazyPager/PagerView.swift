@@ -33,7 +33,6 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
     var currentIndex: Int = 0 {
         didSet {
             computeViewState()
-            page.wrappedValue = currentIndex
             loadMoreIfNeeded()
         }
     }
@@ -60,10 +59,10 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
     public override func layoutSubviews() {
         super.layoutSubviews()
         if !isFirstLoad {
-            goToPage(currentIndex)
+            ensureCurrentPage()
             isFirstLoad = true
         } else if isRotating {
-            goToPage(currentIndex)
+            ensureCurrentPage()
         }
     }
     
@@ -198,8 +197,10 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
     
     
     func removeOutOfFrameViews() {
+        guard let viewLoader = viewLoader else { return }
+        
         for view in loadedViews {
-            if abs(currentIndex - view.index) > config.preloadAmount {
+            if abs(currentIndex - view.index) > config.preloadAmount || view.index >= viewLoader.dataCount {
                 remove(view: view)
             }
         }
@@ -221,7 +222,12 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
     }
     
     func goToPage(_ page: Int) {
-        guard let index = loadedViews.firstIndex(where: { $0.index == page }) else { return }
+        currentIndex = page
+        ensureCurrentPage()
+    }
+    
+    func ensureCurrentPage() {
+        guard let index = loadedViews.firstIndex(where: { $0.index == currentIndex }) else { return }
         contentOffset.x = CGFloat(index) * frame.size.width
     }
     
@@ -243,6 +249,7 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
         guard let visible = loadedViews.first(where: { isSubviewVisible($0, in: scrollView) }) else { return }
         if !scrollView.isTracking, !isRotating  {
             currentIndex = visible.index
+            page.wrappedValue = currentIndex
         }
         resizeOutOfBoundsViews()
     }
