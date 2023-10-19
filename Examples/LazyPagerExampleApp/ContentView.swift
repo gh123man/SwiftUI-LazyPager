@@ -61,7 +61,7 @@ struct ContentView: View {
                     print("tap")
                 }
                 .shouldLoadMore(on: .lastElement(minus: 2)) {
-                    data.append(Foo(img: "nora4"))
+                    data.append(Foo(img: "nora4", idx: data.count + 1))
                 }
                 .background(.black.opacity(opacity))
                 .background(ClearFullScreenBackground())
