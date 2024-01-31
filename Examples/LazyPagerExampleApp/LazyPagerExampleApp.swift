@@ -11,7 +11,16 @@ import SwiftUI
 struct LazyPagerApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            NavigationView {
+                VStack {
+                    NavigationLink(destination: SimpleExample()) {
+                        Text("Simple Example")
+                    }
+                    NavigationLink(destination: FullTestView()) {
+                        Text("Full Test View")
+                    }
+                }
+            }
         }
     }
 }

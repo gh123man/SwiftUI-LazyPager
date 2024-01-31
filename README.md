@@ -23,6 +23,24 @@ Or add the package to your `Package.swift` if your project is a Swift package.
 
 ## Example
 
+A simple image pager that displays images by name from your app assets.
+
+```swift 
+@State var data = [ ... ]
+
+var body: some View {
+    LazyPager(data: data) { element in
+        Image(element)
+            .resizable()
+            .aspectRatio(contentMode: .fit)
+    }
+}
+```
+
+That's it!
+
+## Full Example
+
 ```swift 
 @State var data = [ ... ]
 @State var show = true

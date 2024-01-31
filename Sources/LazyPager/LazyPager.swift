@@ -76,7 +76,7 @@ public struct LazyPager<Element, DataCollecton: RandomAccessCollection, Content:
     var config = Config()
     
     public init(data: DataCollecton,
-                page: Binding<Int>,
+                page: Binding<Int> = .constant(0),
                 @ViewBuilder content: @escaping (Element) -> Content)  {
         self.data = data
         self.page = page
