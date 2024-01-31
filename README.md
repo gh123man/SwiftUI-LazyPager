@@ -1,14 +1,14 @@
 # LazyPager for SwiftUI
 
-A buttery smooth, lazy loaded, panning, zooming, and gesture dismissible pager view for SwiftUI. 
+A buttery smooth, lazy loaded, panning, zooming, and gesture dismissible view pager view for SwiftUI. 
 
-The goal with this library is to expose a simple SwiftUI interface for a fluid and seamless content viewer.
+The goal of this package is to expose a simple SwiftUI interface for a fluid and seamless content viewer. Unlike other pagers for SwiftUI - this is built on top of UIKit APIs exposing feature not yet available in SwiftUI. 
 
 <p align="center">
   <img src="https://github.com/gh123man/LazyPager/assets/959778/a82da8c3-9d65-4782-8fd7-40cc598e16da" alt="animated" />
 </p>
 
-The above example is from [dateit](https://dateit.com/) demonstrating the capabilities of this library. Note: the overlay is custom and can be added by putting `LazyPager` inside a `ZStack`
+The above example is from [dateit](https://dateit.com/) demonstrating the capabilities of this library. Note: the overlay is custom and can be added by putting `LazyPager` inside a `ZStack`.
 
 # Usage
 
@@ -21,8 +21,9 @@ The above example is from [dateit](https://dateit.com/) demonstrating the capabi
 Or add the package to your `Package.swift` if your project is a Swift package.
 
 
-## Example
+## Examples
 
+### Simple Example
 A simple image pager that displays images by name from your app assets.
 
 ```swift 
@@ -39,7 +40,7 @@ var body: some View {
 
 That's it!
 
-## Full Example
+### Detailed Example
 
 ```swift 
 @State var data = [ ... ]
