@@ -10,27 +10,17 @@ import SwiftUI
 import LazyPager
 
 
-
-struct SwiftUIViewWrapper<Content: View>: UIViewControllerRepresentable {
-    @ViewBuilder var swiftUIView: Content
-    
-    func makeUIViewController(context: Context) -> UIHostingController<Content> {
-        let hostingController = UIHostingController(rootView: swiftUIView)
-        hostingController.view.translatesAutoresizingMaskIntoConstraints = false
-        return hostingController
-    }
-    
-    func updateUIViewController(_ uiViewController: UIHostingController<Content>, context: Context) {
-        uiViewController.viewWillLayoutSubviews()
-    }
+struct Const {
+    static let animationDuration: Double = 1
 }
 
 struct Thumbnail: View {
     var name: String
     var namespace: Namespace.ID
+    @Binding var selected: String?
     
     var body: some View {
-        Color.red
+        Color.clear
             .overlay(
             Image(name)
                 .resizable()
@@ -46,44 +36,55 @@ struct Thumbnail: View {
 }
 
 struct FullScreenView: View {
-    var name: String
+    @Binding var selected: String?
     var namespace: Namespace.ID
+    @State var flip = true
+    @Binding var page: Int
+    var data: [String]
     
     var body: some View {
-        Color.red
-            .overlay(
-            
-//            ZStack {
-                Image(name)
-                    .resizable()
-                    .scaledToFit()
-                    .matchedGeometryEffect(id: name,
-                                           in: namespace,
-                                           properties: .frame,
-                                           anchor: .center)
-//                SwiftUIViewWrapper {
-//                    Image(name)
-//                        .resizable()
-//                        .scaledToFit()
-//                        .matchedGeometryEffect(id: name,
-//                                               in: namespace,
-//                                               properties: .frame,
-//                                               anchor: .center)
-//                }
-//            }
+        Color.clear.overlay(
+            ZStack {
+                if flip {
+                    Image(data[page])
+                        .resizable()
+                        .scaledToFit()
+                        .matchedGeometryEffect(id: data[page],
+                                               in: namespace,
+                                               properties: .frame,
+                                               anchor: .center)
+                        .onAppear {
+                            // This is ugly
+                            DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(Int(Const.animationDuration))) {
+                                flip = false
+                            }
+                        }
+                } else {
+                    LazyPager(data: data, page: $page) { name in
+                        Image(name)
+                            .resizable()
+                            .scaledToFit()
+                    }
+                    .onTap {
+                        flip = true
+                        withAnimation(.linear(duration: Const.animationDuration)) {
+                            selected = nil
+                        }
+                    }
+                }
+            }
         )
         .clipped()
         .transition(.scale(scale: 1))
-        .matchedGeometryEffect(id: name + "1", in: namespace, properties: .frame)
-        .background(.clear)
+        .matchedGeometryEffect(id: data[page] + "1", in: namespace, properties: .frame)
     }
-    
 }
 
 struct Experiment: View {
     @Namespace private var animation
     @State private var isFlipped = false
     @State var selected: String? = nil
+    @State var page = 0
     
     @State var data = [
         "nora1",
@@ -96,15 +97,15 @@ struct Experiment: View {
     
     var body: some View {
         ZStack {
-            
             ScrollView {
                 LazyVGrid(columns:  [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())]) {
                     ForEach(data, id: \.self) { value in
                         if selected != value {
-                            Thumbnail(name: value, namespace: animation)
+                            Thumbnail(name: value, namespace: animation, selected: $selected)
                                 .aspectRatio(1, contentMode: .fit)
                                 .onTapGesture {
-                                    withAnimation {
+                                    page = data.firstIndex(of: value) ?? 0
+                                    withAnimation(.linear(duration: Const.animationDuration)) {
                                         selected = value
                                     }
                                 }
@@ -115,30 +116,15 @@ struct Experiment: View {
                 }
             }
             
-            if let s = selected {
-                FullScreenView(name: s, namespace: animation)
-                .onTapGesture {
-                    withAnimation {
-                        selected = nil
+            
+            if selected != nil {
+                Color.black
+                FullScreenView(selected: $selected, namespace: animation, page: $page, data: data)
+                    .onChange(of: page) { val in
+                        selected = data[page]
                     }
-                }
             }
         }
-        
-//        VStack {
-//            if !isFlipped {
-//                Thumbnail(name: "nora1", namespace: animation)
-//            } else {
-//                FullScreenView(name: "nora1", namespace: animation)
-//            }
-//            
-//        }
-//        .background(.clear)
-//        .onTapGesture {
-//            withAnimation {
-//                isFlipped.toggle()
-//            }
-//       }
     }
 }
 
