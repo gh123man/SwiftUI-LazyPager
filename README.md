@@ -2,7 +2,7 @@
 
 A buttery smooth, lazy loaded, panning, zooming, and gesture dismissible view pager view for SwiftUI. 
 
-The goal of this package is to expose a simple SwiftUI interface for a fluid and seamless content viewer. Unlike other pagers for SwiftUI - this is built on top of UIKit APIs exposing feature not yet available in SwiftUI. 
+The goal of this package is to expose a simple SwiftUI interface for a fluid and seamless content viewer. Unlike other pagers for SwiftUI - this is built on top of UIKit APIs exposing features not yet available in SwiftUI. 
 
 <p align="center">
   <img src="https://github.com/gh123man/LazyPager/assets/959778/a82da8c3-9d65-4782-8fd7-40cc598e16da" alt="animated" />
