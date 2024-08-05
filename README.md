@@ -93,7 +93,7 @@ var body: some View {
 }
 ```
 
-For a full working example, [open the sample project](https://github.com/gh123man/LazyPager/tree/master/Examples) in the examples folder, or [check out the code here](https://github.com/gh123man/LazyPager/blob/master/Examples/LazyPagerExampleApp/ContentView.swift)
+For a full working example, [open the sample project](https://github.com/gh123man/LazyPager/tree/master/Examples) in the examples folder, or [check out the code here](https://github.com/gh123man/SwiftUI-LazyPager/blob/master/Examples/LazyPagerExampleApp/FullTestView.swift)
 
 # Features
 
