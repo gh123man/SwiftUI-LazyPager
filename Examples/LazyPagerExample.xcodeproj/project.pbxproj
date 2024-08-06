@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 60;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -16,6 +16,7 @@
 		D353FB742A52174C00C04ABE /* ImageScrollViewUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D353FB732A52174C00C04ABE /* ImageScrollViewUITests.swift */; };
 		D353FB762A52174C00C04ABE /* ImageScrollViewUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D353FB752A52174C00C04ABE /* ImageScrollViewUITestsLaunchTests.swift */; };
 		D367DA132A59E930004497D4 /* LazyPager in Frameworks */ = {isa = PBXBuildFile; productRef = D367DA122A59E930004497D4 /* LazyPager */; };
+		D38D65E32C62E4B900AA140E /* LazyPager in Frameworks */ = {isa = PBXBuildFile; productRef = D38D65E22C62E4B900AA140E /* LazyPager */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -47,7 +48,7 @@
 		D353FB6F2A52174C00C04ABE /* LazyPagerExampleUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LazyPagerExampleUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D353FB732A52174C00C04ABE /* ImageScrollViewUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageScrollViewUITests.swift; sourceTree = "<group>"; };
 		D353FB752A52174C00C04ABE /* ImageScrollViewUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageScrollViewUITestsLaunchTests.swift; sourceTree = "<group>"; };
-		D367DA102A59E925004497D4 /* ImageScrollView */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = ImageScrollView; path = ..; sourceTree = "<group>"; };
+		D38D65E02C62E47C00AA140E /* LazyPager */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = LazyPager; path = ..; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -55,6 +56,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D38D65E32C62E4B900AA140E /* LazyPager in Frameworks */,
 				D367DA132A59E930004497D4 /* LazyPager in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -79,7 +81,6 @@
 		D353FB4C2A52174B00C04ABE = {
 			isa = PBXGroup;
 			children = (
-				D367DA0F2A59E925004497D4 /* Packages */,
 				D353FB572A52174B00C04ABE /* LazyPagerExampleApp */,
 				D353FB682A52174C00C04ABE /* LazyPagerExampleAppTests */,
 				D353FB722A52174C00C04ABE /* LazyPagerExampleAppUITests */,
@@ -135,17 +136,10 @@
 			path = LazyPagerExampleAppUITests;
 			sourceTree = "<group>";
 		};
-		D367DA0F2A59E925004497D4 /* Packages */ = {
-			isa = PBXGroup;
-			children = (
-				D367DA102A59E925004497D4 /* ImageScrollView */,
-			);
-			name = Packages;
-			sourceTree = "<group>";
-		};
 		D367DA112A59E930004497D4 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				D38D65E02C62E47C00AA140E /* LazyPager */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -168,6 +162,7 @@
 			name = LazyPagerExample;
 			packageProductDependencies = (
 				D367DA122A59E930004497D4 /* LazyPager */,
+				D38D65E22C62E4B900AA140E /* LazyPager */,
 			);
 			productName = ImageScrollView;
 			productReference = D353FB552A52174B00C04ABE /* LazyPagerExample.app */;
@@ -241,6 +236,9 @@
 				Base,
 			);
 			mainGroup = D353FB4C2A52174B00C04ABE;
+			packageReferences = (
+				D38D65E12C62E4B900AA140E /* XCLocalSwiftPackageReference "../" */,
+			);
 			productRefGroup = D353FB562A52174B00C04ABE /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -611,8 +609,19 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCLocalSwiftPackageReference section */
+		D38D65E12C62E4B900AA140E /* XCLocalSwiftPackageReference "../" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../;
+		};
+/* End XCLocalSwiftPackageReference section */
+
 /* Begin XCSwiftPackageProductDependency section */
 		D367DA122A59E930004497D4 /* LazyPager */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = LazyPager;
+		};
+		D38D65E22C62E4B900AA140E /* LazyPager */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = LazyPager;
 		};
