@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		D33BC0522B69E6EE004B4338 /* SimpleExample.swift in Sources */ = {isa = PBXBuildFile; fileRef = D33BC0512B69E6EE004B4338 /* SimpleExample.swift */; };
+		D33F96FD2C62F582004D934A /* VerticalMediaPager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D33F96FC2C62F582004D934A /* VerticalMediaPager.swift */; };
 		D353FB592A52174B00C04ABE /* LazyPagerExampleApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D353FB582A52174B00C04ABE /* LazyPagerExampleApp.swift */; };
 		D353FB5B2A52174B00C04ABE /* FullTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D353FB5A2A52174B00C04ABE /* FullTestView.swift */; };
 		D353FB5D2A52174C00C04ABE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D353FB5C2A52174C00C04ABE /* Assets.xcassets */; };
@@ -38,6 +39,7 @@
 
 /* Begin PBXFileReference section */
 		D33BC0512B69E6EE004B4338 /* SimpleExample.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleExample.swift; sourceTree = "<group>"; };
+		D33F96FC2C62F582004D934A /* VerticalMediaPager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerticalMediaPager.swift; sourceTree = "<group>"; };
 		D353FB552A52174B00C04ABE /* LazyPagerExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LazyPagerExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D353FB582A52174B00C04ABE /* LazyPagerExampleApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LazyPagerExampleApp.swift; sourceTree = "<group>"; };
 		D353FB5A2A52174B00C04ABE /* FullTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FullTestView.swift; sourceTree = "<group>"; };
@@ -103,6 +105,7 @@
 			isa = PBXGroup;
 			children = (
 				D353FB582A52174B00C04ABE /* LazyPagerExampleApp.swift */,
+				D33F96FC2C62F582004D934A /* VerticalMediaPager.swift */,
 				D33BC0512B69E6EE004B4338 /* SimpleExample.swift */,
 				D353FB5A2A52174B00C04ABE /* FullTestView.swift */,
 				D353FB5C2A52174C00C04ABE /* Assets.xcassets */,
@@ -282,6 +285,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D353FB5B2A52174B00C04ABE /* FullTestView.swift in Sources */,
+				D33F96FD2C62F582004D934A /* VerticalMediaPager.swift in Sources */,
 				D33BC0522B69E6EE004B4338 /* SimpleExample.swift in Sources */,
 				D353FB592A52174B00C04ABE /* LazyPagerExampleApp.swift in Sources */,
 			);

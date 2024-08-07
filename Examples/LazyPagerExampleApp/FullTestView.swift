@@ -17,6 +17,7 @@ struct Foo {
 
 struct FullTestView: View {
     
+    var direction: Direction
     @State var data = [
         Foo(img: "nora1", idx: 0),
         Foo(img: "nora2", idx: 1),
@@ -41,7 +42,7 @@ struct FullTestView: View {
         }
         .fullScreenCover(isPresented: $show) {
             VStack {
-                LazyPager(data: data, page: $index) { element in
+                LazyPager(data: data, page: $index, direction: direction) { element in
                     ZStack {
                         Image(element.img)
                             .resizable()
@@ -61,7 +62,7 @@ struct FullTestView: View {
                     print("tap")
                 }
                 .shouldLoadMore(on: .lastElement(minus: 2)) {
-                    data.append(Foo(img: "nora4", idx: data.count + 1))
+                    data.append(Foo(img: "nora4", idx: data.count))
                 }
                 .background(.black.opacity(opacity))
                 .background(ClearFullScreenBackground())
@@ -110,6 +111,6 @@ struct FullTestView: View {
 
 struct FullTestView_Previews: PreviewProvider {
     static var previews: some View {
-        FullTestView()
+        FullTestView(direction: .horizontal)
     }
 }

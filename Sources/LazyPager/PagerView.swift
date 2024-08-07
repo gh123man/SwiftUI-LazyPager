@@ -48,7 +48,7 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
         backgroundColor = .clear
         isPagingEnabled = true
         delegate = self
-        
+        contentInsetAdjustmentBehavior = .never
     }
     
     
@@ -114,10 +114,19 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
     }
     
     func addFirstView(_ zoomView: ZoomableView<Element, Content>) {
-        zoomView.leadingConstraint = zoomView.leadingAnchor.constraint(equalTo: leadingAnchor)
-        zoomView.trailingConstraint = zoomView.trailingAnchor.constraint(equalTo: trailingAnchor)
-        zoomView.leadingConstraint?.isActive = true
-        zoomView.trailingConstraint?.isActive = true
+        if config.direction == .horizontal {
+            zoomView.leadingConstraint = zoomView.leadingAnchor.constraint(equalTo: leadingAnchor)
+            zoomView.trailingConstraint = zoomView.trailingAnchor.constraint(equalTo: trailingAnchor)
+            zoomView.leadingConstraint?.isActive = true
+            zoomView.trailingConstraint?.isActive = true
+        } else {
+            zoomView.topConstraint = zoomView.topAnchor.constraint(equalTo: topAnchor)
+            zoomView.bottomConstraint = zoomView.bottomAnchor.constraint(equalTo: bottomAnchor)
+            zoomView.topConstraint?.isActive = true
+            zoomView.bottomConstraint?.isActive = true
+
+        }
+        
     }
     
     func appendView(at index: Int) {
@@ -126,13 +135,23 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
         addSubview(zoomView)
         
         if let lastView = loadedViews.last {
-            lastView.trailingConstraint?.isActive = false
-            lastView.trailingConstraint = nil
-            
-            zoomView.leadingConstraint = zoomView.leadingAnchor.constraint(equalTo: lastView.trailingAnchor)
-            zoomView.trailingConstraint = zoomView.trailingAnchor.constraint(equalTo: trailingAnchor)
-            zoomView.leadingConstraint?.isActive = true
-            zoomView.trailingConstraint?.isActive = true
+            if config.direction == .horizontal {
+                lastView.trailingConstraint?.isActive = false
+                lastView.trailingConstraint = nil
+                
+                zoomView.leadingConstraint = zoomView.leadingAnchor.constraint(equalTo: lastView.trailingAnchor)
+                zoomView.trailingConstraint = zoomView.trailingAnchor.constraint(equalTo: trailingAnchor)
+                zoomView.leadingConstraint?.isActive = true
+                zoomView.trailingConstraint?.isActive = true
+            } else {
+                lastView.bottomConstraint?.isActive = false
+                lastView.bottomConstraint = nil
+                
+                zoomView.topConstraint = zoomView.topAnchor.constraint(equalTo: lastView.bottomAnchor)
+                zoomView.bottomConstraint = zoomView.bottomAnchor.constraint(equalTo: bottomAnchor)
+                zoomView.topConstraint?.isActive = true
+                zoomView.bottomConstraint?.isActive = true
+            }
             
         } else {
             addFirstView(zoomView)
@@ -147,13 +166,23 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
         addSubview(zoomView)
         
         if let firstView = loadedViews.first {
-            firstView.leadingConstraint?.isActive = false
-            firstView.leadingConstraint = nil
-            
-            zoomView.leadingConstraint = zoomView.leadingAnchor.constraint(equalTo: leadingAnchor)
-            zoomView.trailingConstraint = zoomView.trailingAnchor.constraint(equalTo: firstView.leadingAnchor)
-            zoomView.leadingConstraint?.isActive = true
-            zoomView.trailingConstraint?.isActive = true
+            if config.direction == .horizontal {
+                firstView.leadingConstraint?.isActive = false
+                firstView.leadingConstraint = nil
+                
+                zoomView.leadingConstraint = zoomView.leadingAnchor.constraint(equalTo: leadingAnchor)
+                zoomView.trailingConstraint = zoomView.trailingAnchor.constraint(equalTo: firstView.leadingAnchor)
+                zoomView.leadingConstraint?.isActive = true
+                zoomView.trailingConstraint?.isActive = true
+            } else {
+                firstView.topConstraint?.isActive = false
+                firstView.topConstraint = nil
+                
+                zoomView.topConstraint = zoomView.topAnchor.constraint(equalTo: topAnchor)
+                zoomView.bottomConstraint = zoomView.bottomAnchor.constraint(equalTo: firstView.topAnchor)
+                zoomView.topConstraint?.isActive = true
+                zoomView.bottomConstraint?.isActive = true
+            }
             
         } else {
             addFirstView(zoomView)
@@ -162,7 +191,11 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
         layoutSubviews()
         
         loadedViews.insert(zoomView, at: 0)
-        contentOffset.x += frame.size.width
+        if config.direction == .horizontal {
+            contentOffset.x += frame.size.width
+        } else {
+            contentOffset.y += frame.size.height
+        }
     }
     
     func reloadViews() {
@@ -177,21 +210,40 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
         view.removeFromSuperview()
         
         if let firstView = loadedViews.first {
-            firstView.leadingConstraint?.isActive = false
-            firstView.leadingConstraint = nil
-            firstView.leadingConstraint = firstView.leadingAnchor.constraint(equalTo: leadingAnchor)
-            firstView.leadingConstraint?.isActive = true
             
-            if firstView.index > index {
-                contentOffset.x -= frame.size.width
+            if config.direction == .horizontal {
+                firstView.leadingConstraint?.isActive = false
+                firstView.leadingConstraint = nil
+                firstView.leadingConstraint = firstView.leadingAnchor.constraint(equalTo: leadingAnchor)
+                firstView.leadingConstraint?.isActive = true
+                
+                if firstView.index > index {
+                    contentOffset.x -= frame.size.width
+                }
+            } else {
+                firstView.topConstraint?.isActive = false
+                firstView.topConstraint = nil
+                firstView.topConstraint = firstView.topAnchor.constraint(equalTo: topAnchor)
+                firstView.topConstraint?.isActive = true
+                
+                if firstView.index > index {
+                    contentOffset.y -= frame.size.height
+                }
             }
         }
         
         if let lastView = loadedViews.last {
-            lastView.trailingConstraint?.isActive = false
-            lastView.trailingConstraint = nil
-            lastView.trailingConstraint = lastView.trailingAnchor.constraint(equalTo: trailingAnchor)
-            lastView.trailingConstraint?.isActive = true
+            if config.direction == .horizontal {
+                lastView.trailingConstraint?.isActive = false
+                lastView.trailingConstraint = nil
+                lastView.trailingConstraint = lastView.trailingAnchor.constraint(equalTo: trailingAnchor)
+                lastView.trailingConstraint?.isActive = true
+            } else {
+                lastView.bottomConstraint?.isActive = false
+                lastView.bottomConstraint = nil
+                lastView.bottomConstraint = lastView.bottomAnchor.constraint(equalTo: bottomAnchor)
+                lastView.bottomConstraint?.isActive = true
+            }
         }
     }
     
@@ -208,17 +260,10 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
     
     func resizeOutOfBoundsViews() {
         for v in loadedViews {
-            if v.index != currentIndex, !isSubviewVisible(v, in: self) {
+            if v.index != currentIndex {
                 v.zoomScale = 1
             }
         }
-    }
-    
-    func isSubviewVisible(_ subview: UIView, in scrollView: UIScrollView) -> Bool {
-        let visibleRect = CGRect(origin: scrollView.contentOffset, size: CGSize(width: scrollView.bounds.size.width - 1, height: scrollView.bounds.size.height))
-        let subviewFrame = scrollView.convert(subview.frame, from: subview.superview)
-        let intersectionRect = visibleRect.intersection(subviewFrame)
-        return !intersectionRect.isNull && intersectionRect.size.height > 0 && intersectionRect.size.width > 0
     }
     
     func goToPage(_ page: Int) {
@@ -228,7 +273,11 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
     
     func ensureCurrentPage() {
         guard let index = loadedViews.firstIndex(where: { $0.index == currentIndex }) else { return }
-        contentOffset.x = CGFloat(index) * frame.size.width
+        if config.direction == .horizontal {
+            contentOffset.x = CGFloat(index) * frame.size.width
+        } else {
+            contentOffset.y = CGFloat(index) * frame.size.height
+        }
     }
     
     func loadMoreIfNeeded() {
@@ -245,16 +294,36 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
     
     // MARK: UISCrollVieDelegate methods
     
+    var lastPos: CGFloat = 0
+    
     public func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        guard let visible = loadedViews.first(where: { isSubviewVisible($0, in: scrollView) }) else { return }
         if !scrollView.isTracking, !isRotating  {
-            currentIndex = visible.index
+            var relativeIndex: Int
+            if config.direction == .horizontal {
+                relativeIndex = Int(round(scrollView.contentOffset.x / scrollView.frame.width))
+            } else {
+                relativeIndex = Int(round(scrollView.contentOffset.y / scrollView.frame.height))
+            }
+            relativeIndex = relativeIndex < 0 ? 0 : relativeIndex
+            currentIndex = loadedViews[relativeIndex].index
             page.wrappedValue = currentIndex
         }
-        resizeOutOfBoundsViews()
-    }
-    
-    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-        resizeOutOfBoundsViews()
+        
+        
+        // Horribly janky way to detect when scrolling (both touching and animation) is finnished.
+        let caputred: CGFloat
+        
+        if config.direction == .horizontal {
+            caputred = scrollView.contentOffset.x
+        } else {
+            caputred = scrollView.contentOffset.y
+        }
+        
+        lastPos = caputred
+        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(100)) {
+            if self.lastPos == caputred, !scrollView.isTracking {
+                self.resizeOutOfBoundsViews()
+            }
+        }
     }
 }

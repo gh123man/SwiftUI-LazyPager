@@ -13,6 +13,8 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate {
     
     var trailingConstraint: NSLayoutConstraint?
     var leadingConstraint: NSLayoutConstraint?
+    var topConstraint: NSLayoutConstraint?
+    var bottomConstraint: NSLayoutConstraint?
     var contentTopToContent: NSLayoutConstraint!
     var contentTopToFrame: NSLayoutConstraint!
     var contentBottomToFrame: NSLayoutConstraint!
@@ -23,7 +25,7 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate {
     
     var allowScroll: Bool = true {
         didSet {
-            if allowScroll {
+            if allowScroll, config.direction == .horizontal {
                 contentTopToFrame.isActive = false
                 contentBottomToFrame.isActive = false
                 bottomView.isHidden = false

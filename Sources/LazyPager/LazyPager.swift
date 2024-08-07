@@ -18,6 +18,11 @@ public enum DoubleTap {
     case scale(CGFloat)
 }
 
+public enum Direction {
+    case horizontal
+    case vertical
+}
+
 public struct Config {
     /// binding variable to control a custom background opacity. LazyPager is transparent by default
     public var backgroundOpacity: Binding<CGFloat>?
@@ -42,6 +47,9 @@ public struct Config {
     
     /// Called when more content should be loaded
     public var loadMoreCallback: (() -> ())?
+    
+    /// Direction of the pager
+    public var direction : Direction = .horizontal
     
     /// Advanced settings (only accessible via .settings)
     
@@ -77,10 +85,12 @@ public struct LazyPager<Element, DataCollecton: RandomAccessCollection, Content:
     
     public init(data: DataCollecton,
                 page: Binding<Int> = .constant(0),
+                direction: Direction = .horizontal,
                 @ViewBuilder content: @escaping (Element) -> Content)  {
         self.data = data
         self.page = page
         self.viewLoader = content
+        self.config.direction = direction
     }
 
     public class Coordinator: ViewDataProvider<Content, DataCollecton, Element> { }
@@ -88,6 +98,9 @@ public struct LazyPager<Element, DataCollecton: RandomAccessCollection, Content:
 
 public extension LazyPager {
     func onDismiss(backgroundOpacity: Binding<CGFloat>? = nil, _ callback: @escaping () -> ()) -> LazyPager {
+        guard config.direction == .horizontal else {
+            return self
+        }
         var this = self
         this.config.backgroundOpacity = backgroundOpacity
         this.config.dismissCallback = callback
