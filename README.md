@@ -100,12 +100,27 @@ var body: some View {
 }
 ```
 
+#### Vertical paging
+
+```swift 
+@State var data = [ ... ]
+
+var body: some View {
+    LazyPager(data: data, direction: .vertical) { element in
+        Image(element)
+            .resizable()
+            .aspectRatio(contentMode: .fill)
+    }
+}
+```
+
 For a full working example, [open the sample project](https://github.com/gh123man/LazyPager/tree/master/Examples) in the examples folder, or [check out the code here](https://github.com/gh123man/SwiftUI-LazyPager/blob/master/Examples/LazyPagerExampleApp/FullTestView.swift)
 
 # Features
 
 - All content is lazy loaded. By default content is pre-loaded 3 elements ahead and behind the current index. 
 - Display any kind of content - not just images! 
+- Horizontal or Vertical paging
 - Lazy loaded views are disposed when they are outside of the pre-load frame to conserve resources. 
 - Enable zooming and panning with `.zoomable(min: CGFloat, max: CGFloat)`
 - Double tap to zoom is also supported.
@@ -113,7 +128,7 @@ For a full working example, [open the sample project](https://github.com/gh123ma
 - Works with `.ignoresSafeArea()` (or not) to get a true full screen view.
 - Drag to dismiss is supported with `.onDismiss` - Supply a binding opacity value to control the background opacity during the transition. 
 - Tap events are handled internally, so use `.onTap` to handle single taps (useful for hiding and showing UI)
-- Use `.settings` to [modify advanced settings](https://github.com/gh123man/LazyPager/blob/master/Sources/LazyPager/LazyPager.swift#L46)
+- Use `.settings` to [modify advanced settings](https://github.com/gh123man/SwiftUI-LazyPager/blob/master/Sources/LazyPager/LazyPager.swift#L54)
 
 
 # Detailed usage
@@ -126,6 +141,6 @@ For a full working example, [open the sample project](https://github.com/gh123ma
 You can customize the double tap behavior using the `zoomable(min: CGFloat, max: CGFloat, doubleTapGesture: DoubleTap)`. By default `doubleTapGesture` is set to `.scale(0.5)` which means "zoom 50% when double tapped". You can change this to a different ratio or set it to `.disabled` to disable the double tap gesture. 
 
 ## Dismiss gesture handling 
-By default `.onDismiss` will be called after the pull to dismiss gesture is completed. It is often desirable to fade out the background in the process. `LazyPager` uses a fully transparent background by default so you can set your own custom background. 
+By default `.onDismiss` will be called after the pull to dismiss gesture is completed. It is often desirable to fade out the background in the process. `LazyPager` uses a fully transparent background by default so you can set your own custom background. NOTE: `.onDismiss` is only supported for `.horizontal` pagers.
 
 To control the dismiss opacity of a custom background, use a `Binding<CGFloat>` like `.onDismiss(backgroundOpacity: $opacity) {` to fade out your custom background.
