@@ -4,9 +4,16 @@ A buttery smooth, lazy loaded, panning, zooming, and gesture dismissible view pa
 
 The goal of this package is to expose a simple SwiftUI interface for a fluid and seamless content viewer. Unlike other pagers for SwiftUI - this is built on top of UIKit APIs exposing features not yet available in SwiftUI. 
 
+### Horizontal
 <p align="center">
   <img src="https://github.com/gh123man/LazyPager/assets/959778/a82da8c3-9d65-4782-8fd7-40cc598e16da" alt="animated" />
 </p>
+
+### Vertical
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/21679506-c2ad-491c-8fe8-13fbd2b0aa2a" alt="animated" />
+</p>
+
 
 The above example is from [dateit](https://dateit.com/) demonstrating the capabilities of this library. Note: the overlay is custom and can be added by putting `LazyPager` inside a `ZStack`.
 
