@@ -305,6 +305,8 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
                 relativeIndex = Int(round(scrollView.contentOffset.y / scrollView.frame.height))
             }
             relativeIndex = relativeIndex < 0 ? 0 : relativeIndex
+            relativeIndex = relativeIndex >= loadedViews.count ? loadedViews.count-1 : relativeIndex
+            
             currentIndex = loadedViews[relativeIndex].index
             page.wrappedValue = currentIndex
         }
