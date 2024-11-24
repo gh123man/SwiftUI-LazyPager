@@ -16,28 +16,10 @@ struct SimpleExample: View {
     @State var show = false
     
     var body: some View {
-        VStack {
-            Button("Show") {
-                show.toggle()
-            }
-        }
-        .fullScreenCover(isPresented: $show) {
-            LazyPager(data: data) { element in
-                VStack {
-                    Image(element)
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .onTapGesture {
-                            print("tap image")
-                        }
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .contentShape(Rectangle())
-                .onTapGesture {
-                    show.toggle()
-                    print("tap background")
-                }
-            }
+        LazyPager(data: data) { element in
+            Image(element)
+                .resizable()
+                .aspectRatio(contentMode: .fit)
         }
     }
 }
