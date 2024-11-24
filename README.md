@@ -89,6 +89,15 @@ var body: some View {
         .shouldLoadMore {
             data.append("foobar")
         }
+        
+        // Get notified when swiping past the beginning or end of the list 
+        .overscroll { position in
+            if position == .beginning {
+                print("Swiped past beginning")
+            } else {
+                print("Swiped past end")
+            }
+        }
 
         // Set the background color with the drag opacity control
         .background(.black.opacity(opacity))
@@ -130,7 +139,7 @@ For a full working example, [open the sample project](https://github.com/gh123ma
 - Works with `.ignoresSafeArea()` (or not) to get a true full screen view.
 - Drag to dismiss is supported with `.onDismiss` - Supply a binding opacity value to control the background opacity during the transition. 
 - Tap events are handled internally, so use `.onTap` to handle single taps (useful for hiding and showing UI)
-- Use `.settings` to [modify advanced settings](https://github.com/gh123man/SwiftUI-LazyPager/blob/master/Sources/LazyPager/LazyPager.swift#L54)
+- Use `.settings` to [modify advanced settings](https://github.com/gh123man/SwiftUI-LazyPager/blob/master/Sources/LazyPager/LazyPager.swift#L62)
 
 
 # Detailed usage

@@ -64,6 +64,13 @@ struct FullTestView: View {
                 .shouldLoadMore(on: .lastElement(minus: 2)) {
                     data.append(Foo(img: "nora4", idx: data.count))
                 }
+                .overscroll { position in
+                    if position == .beginning {
+                        print("Swiped past beginning")
+                    } else {
+                        print("Swiped past end")
+                    }
+                }
                 .background(.black.opacity(opacity))
                 .background(ClearFullScreenBackground())
                 .ignoresSafeArea()

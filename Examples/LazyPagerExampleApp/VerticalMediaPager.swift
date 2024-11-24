@@ -25,6 +25,13 @@ struct VerticalMediaPager: View {
                         .resizable()
                         .aspectRatio(contentMode: .fill)
                 }
+                .overscroll {
+                    if $0 == .beginning {
+                        print("Swiped past beginning")
+                    } else if $0 == .end {
+                        print("Swiped past end")
+                    }
+                }
                 .ignoresSafeArea()
                 
                 VStack(alignment: .leading) {

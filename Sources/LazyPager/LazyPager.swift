@@ -23,6 +23,11 @@ public enum Direction {
     case vertical
 }
 
+public enum ListPosition {
+    case beginning
+    case end
+}
+
 public struct Config {
     /// binding variable to control a custom background opacity. LazyPager is transparent by default
     public var backgroundOpacity: Binding<CGFloat>?
@@ -51,7 +56,10 @@ public struct Config {
     /// Direction of the pager
     public var direction : Direction = .horizontal
     
-    /// Advanced settings (only accessible via .settings)
+    /// Called whent the end of data is reached and the user tries to swipe again
+    public var overscrollCallback: ((ListPosition) -> ())?
+
+    /// Advanced settings (only accessibleevia .settings)
     
     /// How may out of view pages to load in advance (forward and backwards)
     public var preloadAmount: Int = 3
@@ -74,6 +82,9 @@ public struct Config {
     
     /// The minimum scroll distance the in which the pinch gesture is enabled
     public var pinchGestureEnableOffset: Double = 10
+    
+    /// % ammount (from 0-1) of overscroll needed to call overscrollCallback
+    public var overscrollThreshold: Double = 0.15
 }
 
 public struct LazyPager<Element, DataCollecton: RandomAccessCollection, Content: View> where DataCollecton.Index == Int, DataCollecton.Element == Element {
@@ -131,6 +142,12 @@ public extension LazyPager {
     func settings(_ adjust: @escaping (inout Config) -> ()) -> LazyPager {
         var this = self
         adjust(&this.config)
+        return this
+    }
+    
+    func overscroll(_ callback: @escaping (ListPosition) -> ()) -> LazyPager {
+        var this = self
+        this.config.overscrollCallback = callback
         return this
     }
 }

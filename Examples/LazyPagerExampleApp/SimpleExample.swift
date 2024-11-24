@@ -13,11 +13,31 @@ struct SimpleExample: View {
         "nora6",
     ]
     
+    @State var show = false
+    
     var body: some View {
-        LazyPager(data: data) { element in
-            Image(element)
-                .resizable()
-                .aspectRatio(contentMode: .fit)
+        VStack {
+            Button("Show") {
+                show.toggle()
+            }
+        }
+        .fullScreenCover(isPresented: $show) {
+            LazyPager(data: data) { element in
+                VStack {
+                    Image(element)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .onTapGesture {
+                            print("tap image")
+                        }
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    show.toggle()
+                    print("tap background")
+                }
+            }
         }
     }
 }

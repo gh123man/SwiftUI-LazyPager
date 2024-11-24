@@ -295,22 +295,37 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
     // MARK: UISCrollVieDelegate methods
     
     var lastPos: CGFloat = 0
+    var hasNotfiedOverscroll = false
     
     public func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        var relativeIndex: Int
+        var absoluteOffset: CGFloat
+        if config.direction == .horizontal {
+            absoluteOffset = scrollView.contentOffset.x / scrollView.frame.width
+            relativeIndex = Int(round(absoluteOffset))
+        } else {
+            absoluteOffset = scrollView.contentOffset.y / scrollView.frame.height
+            relativeIndex = Int(round(absoluteOffset))
+        }
+        relativeIndex = relativeIndex < 0 ? 0 : relativeIndex
+        relativeIndex = relativeIndex >= loadedViews.count ? loadedViews.count-1 : relativeIndex
+        
         if !scrollView.isTracking, !isRotating  {
-            var relativeIndex: Int
-            if config.direction == .horizontal {
-                relativeIndex = Int(round(scrollView.contentOffset.x / scrollView.frame.width))
-            } else {
-                relativeIndex = Int(round(scrollView.contentOffset.y / scrollView.frame.height))
-            }
-            relativeIndex = relativeIndex < 0 ? 0 : relativeIndex
-            relativeIndex = relativeIndex >= loadedViews.count ? loadedViews.count-1 : relativeIndex
-            
             currentIndex = loadedViews[relativeIndex].index
             page.wrappedValue = currentIndex
         }
         
+        if !hasNotfiedOverscroll {
+            if relativeIndex >= loadedViews.count-1, absoluteOffset - CGFloat(relativeIndex) > config.overscrollThreshold {
+                config.overscrollCallback?(.end)
+                hasNotfiedOverscroll = true
+            }
+            
+            if relativeIndex <= 0, absoluteOffset - CGFloat(relativeIndex) < -config.overscrollThreshold {
+                config.overscrollCallback?(.beginning)
+                hasNotfiedOverscroll = true
+            }
+        }
         
         // Horribly janky way to detect when scrolling (both touching and animation) is finnished.
         let caputred: CGFloat
@@ -324,6 +339,7 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
         lastPos = caputred
         DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(100)) {
             if self.lastPos == caputred, !scrollView.isTracking {
+                self.hasNotfiedOverscroll = false
                 self.resizeOutOfBoundsViews()
             }
         }
