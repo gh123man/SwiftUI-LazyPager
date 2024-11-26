@@ -22,11 +22,6 @@ struct AnimatedPagerControlsExample: View {
                 Image(element)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
-                    .onTapGesture {
-                        withAnimation(Animation.easeInOut(duration: 2)) {
-                            index = data.count - 1
-                        }
-                    }
             }
             HStack(spacing: 20) {
                 Button("First") {
