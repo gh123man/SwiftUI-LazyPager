@@ -71,6 +71,7 @@ struct FullTestView: View {
             }
             .background(.black.opacity(opacity))
             .background(ClearFullScreenBackground())
+            .ignoresSafeArea()
             VStack {
                 HStack(spacing: 30) {
                     Button("-") {
