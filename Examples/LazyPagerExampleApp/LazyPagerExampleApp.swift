@@ -9,6 +9,8 @@ import SwiftUI
 
 @main
 struct LazyPagerApp: App {
+    @State var showFull = false
+    
     var body: some Scene {
         WindowGroup {
             NavigationView {
@@ -16,16 +18,22 @@ struct LazyPagerApp: App {
                     NavigationLink(destination: SimpleExample()) {
                         Text("Simple Example")
                     }
-                    NavigationLink(destination: FullTestView(direction: .horizontal)) {
-                        Text("Full Test View horizontal")
+                    NavigationLink(destination: AnimatedPagerControlsExample()) {
+                        Text("Animated Pager Controls Example")
                     }
-                    NavigationLink(destination: FullTestView(direction: .vertical)) {
+                    Button("full Test View horizontal") {
+                        showFull.toggle()
+                    }
+                    NavigationLink(destination: FullTestView(direction: .vertical, show: .constant(true))) {
                         Text("Full Test View vertical")
                     }
                     NavigationLink(destination: VerticalMediaPager()) {
                         Text("Vertical media pager sample")
                     }
                 }
+            }
+            .fullScreenCover(isPresented: $showFull) {
+                FullTestView(direction: .horizontal, show: $showFull)
             }
         }
     }

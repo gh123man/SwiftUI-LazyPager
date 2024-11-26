@@ -15,64 +15,53 @@ struct VerticalMediaPager: View {
     @State var show = true
     
     var body: some View {
-        Button("Open") {
-            show.toggle()
-        }
-        .fullScreenCover(isPresented: $show) {
-            ZStack {
-                LazyPager(data: data, direction: .vertical) { element in
-                    Image(element)
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
+        ZStack {
+            LazyPager(data: data, direction: .vertical) { element in
+                Image(element)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+            }
+            .overscroll {
+                if $0 == .beginning {
+                    print("Swiped past beginning")
+                } else if $0 == .end {
+                    print("Swiped past end")
                 }
-                .overscroll {
-                    if $0 == .beginning {
-                        print("Swiped past beginning")
-                    } else if $0 == .end {
-                        print("Swiped past end")
-                    }
-                }
-                .ignoresSafeArea()
-                
-                VStack(alignment: .leading) {
-                    Button(action: {
-                        show.toggle()
-                    }) {
-                        imgButton("x.circle.fill")
-                    }
-                    .padding(.leading)
-                    HStack {
-                        Spacer()
-                        VStack(spacing: 30) {
-                            Spacer()
-                            imgButton("heart.fill")
-                            imgButton("text.bubble.fill")
-                            imgButton("bookmark.fill")
-                            imgButton("arrow.turn.up.right")
-                        }
-                        .padding(.bottom, 20)
-                    }
-                    .padding()
+            }
+            .ignoresSafeArea()
+            
+            VStack(alignment: .leading) {
+                HStack {
                     Spacer()
-                    HStack {
-                        VStack {
-                            Text("CatTok")
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .font(.title2)
-                            Text("Nora is an adorable cat")
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                        }
+                    VStack(spacing: 30) {
                         Spacer()
-                        Text("😸")
-                            .font(.title)
-                            .padding(5)
-                            .background(.pink.opacity(0.8))
-                            .clipShape(Circle())
+                        imgButton("heart.fill")
+                        imgButton("text.bubble.fill")
+                        imgButton("bookmark.fill")
+                        imgButton("arrow.turn.up.right")
                     }
-                    .padding()
-                    .foregroundColor(.white)
-                    .background(.black.opacity(0.5))
+                    .padding(.bottom, 20)
                 }
+                .padding()
+                Spacer()
+                HStack {
+                    VStack {
+                        Text("CatTok")
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .font(.title2)
+                        Text("Nora is an adorable cat")
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    Spacer()
+                    Text("😸")
+                        .font(.title)
+                        .padding(5)
+                        .background(.pink.opacity(0.8))
+                        .clipShape(Circle())
+                }
+                .padding()
+                .foregroundColor(.white)
+                .background(.black.opacity(0.5))
             }
         }
     }

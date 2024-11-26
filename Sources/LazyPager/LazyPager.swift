@@ -156,7 +156,7 @@ extension LazyPager: UIViewControllerRepresentable {
     
     public func makeUIViewController(context: Context) -> Coordinator {
         DispatchQueue.main.async {
-            context.coordinator.goToPage(page.wrappedValue)
+            context.coordinator.goToPage(page.wrappedValue, animated: false)
         }
         return context.coordinator
     }
@@ -175,13 +175,13 @@ extension LazyPager: UIViewControllerRepresentable {
         defer { uiViewController.reloadViews() }
         if page.wrappedValue != uiViewController.pagerView.currentIndex {
             // Index was explicitly updated
-            uiViewController.goToPage(page.wrappedValue)
+            uiViewController.goToPage(page.wrappedValue, animated: context.transaction.animation != nil)
         }
         
         if page.wrappedValue >= data.count {
-            uiViewController.goToPage(data.count - 1)
+            uiViewController.goToPage(data.count - 1, animated: false)
         } else if page.wrappedValue < 0 {
-            uiViewController.goToPage(0)
+            uiViewController.goToPage(0, animated: false)
         }
         
     }

@@ -59,10 +59,10 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
     public override func layoutSubviews() {
         super.layoutSubviews()
         if !isFirstLoad {
-            ensureCurrentPage()
+            ensureCurrentPage(animated: false)
             isFirstLoad = true
         } else if isRotating {
-            ensureCurrentPage()
+            ensureCurrentPage(animated: false)
         }
     }
     
@@ -266,17 +266,19 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
         }
     }
     
-    func goToPage(_ page: Int) {
+    func goToPage(_ page: Int, animated: Bool) {
         currentIndex = page
-        ensureCurrentPage()
+        DispatchQueue.main.async {
+            self.ensureCurrentPage(animated: animated)
+        }
     }
     
-    func ensureCurrentPage() {
+    func ensureCurrentPage(animated: Bool) {
         guard let index = loadedViews.firstIndex(where: { $0.index == currentIndex }) else { return }
         if config.direction == .horizontal {
-            contentOffset.x = CGFloat(index) * frame.size.width
+            setContentOffset(CGPoint(x: CGFloat(index) * frame.size.width, y: contentOffset.y), animated: animated)
         } else {
-            contentOffset.y = CGFloat(index) * frame.size.height
+            setContentOffset(CGPoint(x: contentOffset.x, y: CGFloat(index) * frame.size.height), animated: animated)
         }
     }
     

@@ -41,8 +41,8 @@ public class ViewDataProvider<Content: View, DataCollecton: RandomAccessCollecti
         fatalError("init(coder:) has not been implemented")
     }
     
-    func goToPage(_ page: Int) {
-        pagerView.goToPage(page)
+    func goToPage(_ page: Int, animated: Bool) {
+        pagerView.goToPage(page, animated: animated)
     }
     
     func reloadViews() {
@@ -78,7 +78,7 @@ public class ViewDataProvider<Content: View, DataCollecton: RandomAccessCollecti
         coordinator.animate(alongsideTransition: { context in }, completion: { context in
             self.pagerView.isRotating = false
             DispatchQueue.main.async {
-                self.pagerView.goToPage(self.pagerView.currentIndex)
+                self.pagerView.goToPage(self.pagerView.currentIndex, animated: false)
             }
         })
     }
