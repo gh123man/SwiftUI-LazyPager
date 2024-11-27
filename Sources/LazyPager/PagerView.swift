@@ -48,7 +48,6 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
         backgroundColor = .clear
         isPagingEnabled = true
         delegate = self
-        contentInsetAdjustmentBehavior = .never
     }
     
     
