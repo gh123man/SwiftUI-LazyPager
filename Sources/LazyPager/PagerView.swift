@@ -297,7 +297,8 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
     
     var lastPos: CGFloat = 0
     var hasNotfiedOverscroll = false
-    
+    var scrollSettled = true
+
     public func scrollViewDidScroll(_ scrollView: UIScrollView) {
         var relativeIndex: Int
         var absoluteOffset: CGFloat
@@ -314,6 +315,10 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
         if !scrollView.isTracking, !isRotating  {
             currentIndex = loadedViews[relativeIndex].index
             page.wrappedValue = currentIndex
+        }
+        
+        if let index = loadedViews[safe: relativeIndex]?.index {
+            config.absoluteContentPosition?.wrappedValue = CGFloat(index) + absoluteOffset - CGFloat(relativeIndex)
         }
         
         if !hasNotfiedOverscroll {
@@ -342,6 +347,7 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
             if self.lastPos == caputred, !scrollView.isTracking {
                 self.hasNotfiedOverscroll = false
                 self.resizeOutOfBoundsViews()
+                self.scrollSettled = true
             }
         }
     }

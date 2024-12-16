@@ -58,6 +58,8 @@ public struct Config {
     
     /// Called whent the end of data is reached and the user tries to swipe again
     public var overscrollCallback: ((ListPosition) -> ())?
+    
+    public var absoluteContentPosition: Binding<CGFloat>?
 
     /// Advanced settings (only accessibleevia .settings)
     
@@ -90,16 +92,25 @@ public struct Config {
 public struct LazyPager<Element, DataCollecton: RandomAccessCollection, Content: View> where DataCollecton.Index == Int, DataCollecton.Element == Element {
     private var viewLoader: (Element) -> Content
     private var data: DataCollecton
-    private var page: Binding<Int>
+    
+    @State private var defaultPageInternal = 0
+    private var providedPage: Binding<Int>?
+    
+    private var page: Binding<Int> {
+        providedPage ?? Binding(
+            get: { defaultPageInternal },
+            set: { defaultPageInternal = $0 }
+        )
+    }
     
     var config = Config()
     
     public init(data: DataCollecton,
-                page: Binding<Int> = .constant(0),
+                page: Binding<Int>? = nil,
                 direction: Direction = .horizontal,
                 @ViewBuilder content: @escaping (Element) -> Content)  {
         self.data = data
-        self.page = page
+        self.providedPage = page
         self.viewLoader = content
         self.config.direction = direction
     }
@@ -148,6 +159,15 @@ public extension LazyPager {
     func overscroll(_ callback: @escaping (ListPosition) -> ()) -> LazyPager {
         var this = self
         this.config.overscrollCallback = callback
+        return this
+    }
+    
+    func absoluteContentPosition(_ absoluteContentPosition: Binding<CGFloat>? = nil) -> LazyPager {
+        guard config.direction == .horizontal else {
+            return self
+        }
+        var this = self
+        this.config.absoluteContentPosition = absoluteContentPosition
         return this
     }
 }
