@@ -28,18 +28,14 @@ public enum ListPosition {
     case end
 }
 
+public enum ZoomConfig {
+    case disabled
+    case custom(min: CGFloat, max: CGFloat, doubleTap: DoubleTap)
+}
+
 public struct Config {
     /// binding variable to control a custom background opacity. LazyPager is transparent by default
     public var backgroundOpacity: Binding<CGFloat>?
-    
-    /// The minimum zoom level (https://developer.apple.com/documentation/uikit/uiscrollview/1619428-minimumzoomscale)
-    public var minZoom: CGFloat = 1
-    
-    /// The maximum zoom level (https://developer.apple.com/documentation/uikit/uiscrollview/1619408-maximumzoomscale)
-    public var maxZoom: CGFloat = 1
-    
-    /// How to handle double tap events
-    public var doubleTapSetting: DoubleTap = .disabled
     
     /// Called when the view is done dismissing - dismiss gesture is disabled if nil
     public var dismissCallback: (() -> ())?
@@ -60,7 +56,7 @@ public struct Config {
     public var overscrollCallback: ((ListPosition) -> ())?
     
     public var absoluteContentPosition: Binding<CGFloat>?
-
+    
     /// Advanced settings (only accessibleevia .settings)
     
     /// How may out of view pages to load in advance (forward and backwards)
@@ -95,6 +91,7 @@ public struct LazyPager<Element, DataCollecton: RandomAccessCollection, Content:
     
     @State private var defaultPageInternal = 0
     private var providedPage: Binding<Int>?
+    private var zoomConfigGetter: (Element) -> ZoomConfig = { _ in .disabled }
     
     private var page: Binding<Int> {
         providedPage ?? Binding(
@@ -144,9 +141,15 @@ public extension LazyPager {
     
     func zoomable(min: CGFloat, max: CGFloat, doubleTapGesture: DoubleTap = .scale(0.5)) -> LazyPager {
         var this = self
-        this.config.minZoom = min
-        this.config.maxZoom = max
-        this.config.doubleTapSetting = doubleTapGesture
+        this.zoomConfigGetter = { _ in
+            return .custom(min: min, max: max, doubleTap: doubleTapGesture)
+        }
+        return this
+    }
+    
+    func zoomable(onElement: @escaping (Element) -> ZoomConfig) -> LazyPager {
+        var this = self
+        this.zoomConfigGetter = onElement
         return this
     }
     
@@ -185,7 +188,9 @@ extension LazyPager: UIViewControllerRepresentable {
         return Coordinator(data: data,
                            page: page,
                            config: config,
-                           viewLoader: viewLoader)
+                           viewLoader: viewLoader,
+                           zoomConfigGetter: zoomConfigGetter
+        )
     }
 
     public func updateUIViewController(_ uiViewController: Coordinator, context: Context) {

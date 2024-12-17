@@ -15,6 +15,7 @@ public class ViewDataProvider<Content: View, DataCollecton: RandomAccessCollecti
     var data: DataCollecton
     var config: Config
     var pagerView: PagerView<Element, ViewDataProvider, Content>
+    var zoomConfigGetter: (Element) -> ZoomConfig
     
     var dataCount: Int {
         return data.count
@@ -24,13 +25,15 @@ public class ViewDataProvider<Content: View, DataCollecton: RandomAccessCollecti
     init(data: DataCollecton,
          page: Binding<Int>,
          config: Config,
-         viewLoader: @escaping (Element) -> Content) {
+         viewLoader: @escaping (Element) -> Content,
+         zoomConfigGetter: @escaping (Element) -> ZoomConfig) {
         
         self.data = data
         self.viewLoader = viewLoader
         self.config = config
         self.pagerView = PagerView(page: page, config: config)
-        
+        self.zoomConfigGetter = zoomConfigGetter
+
         super.init(nibName: nil, bundle: nil)
         self.pagerView.viewLoader = self
         
@@ -56,7 +59,7 @@ public class ViewDataProvider<Content: View, DataCollecton: RandomAccessCollecti
         guard let dta = data[safe: index] else { return nil }
         
         let hostingController = UIHostingController(rootView: viewLoader(dta))
-        return ZoomableView(hostingController: hostingController, index: index, data: dta, config: config)
+        return ZoomableView(hostingController: hostingController, index: index, data: dta, config: config, zoomConfigGetter: zoomConfigGetter)
     }
     
     func updateHostedView(for zoomableView: ZoomableView<Element, Content>) {
