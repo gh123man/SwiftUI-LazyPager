@@ -55,10 +55,13 @@ public struct Config<Element> {
     /// Called whent the end of data is reached and the user tries to swipe again
     public var overscrollCallback: ((ListPosition) -> ())?
     
+    /// The element index + the offset while paging
     public var absoluteContentPosition: Binding<CGFloat>?
     
+    /// Called every view update to get the zoom config
     public var zoomConfigGetter: (Element) -> ZoomConfig = { _ in .disabled }
     
+    /// Called while zooming to provide the current zoom level for an element
     public var onZoomHandler: ((Element, CGFloat) -> ())?
 
     /// Advanced settings (only accessibleevia .settings)
