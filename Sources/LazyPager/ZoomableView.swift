@@ -251,6 +251,8 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate {
         if zoomScale <= maximumZoomScale {
             contentInset = UIEdgeInsets(top: top - safeAreaInsets.top, left: left, bottom: top - safeAreaInsets.bottom, right: left)
         }
+        
+        config.onZoomHandler?(data, scrollView.zoomScale)
     }
     
     func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {

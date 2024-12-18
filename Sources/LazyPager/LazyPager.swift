@@ -59,6 +59,8 @@ public struct Config<Element> {
     
     public var zoomConfigGetter: (Element) -> ZoomConfig = { _ in .disabled }
     
+    public var onZoomHandler: ((Element, CGFloat) -> ())?
+
     /// Advanced settings (only accessibleevia .settings)
     
     /// How may out of view pages to load in advance (forward and backwards)
@@ -172,6 +174,12 @@ public extension LazyPager {
         }
         var this = self
         this.config.absoluteContentPosition = absoluteContentPosition
+        return this
+    }
+    
+    func onZoom(_ onZoomHandler: @escaping (Element, CGFloat) -> ()) -> LazyPager {
+        var this = self
+        this.config.onZoomHandler = onZoomHandler
         return this
     }
 }
