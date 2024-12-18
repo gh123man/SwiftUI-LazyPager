@@ -33,7 +33,7 @@ public enum ZoomConfig {
     case custom(min: CGFloat, max: CGFloat, doubleTap: DoubleTap)
 }
 
-public struct Config {
+public struct Config<Element> {
     /// binding variable to control a custom background opacity. LazyPager is transparent by default
     public var backgroundOpacity: Binding<CGFloat>?
     
@@ -56,6 +56,8 @@ public struct Config {
     public var overscrollCallback: ((ListPosition) -> ())?
     
     public var absoluteContentPosition: Binding<CGFloat>?
+    
+    public var zoomConfigGetter: (Element) -> ZoomConfig = { _ in .disabled }
     
     /// Advanced settings (only accessibleevia .settings)
     
@@ -91,7 +93,6 @@ public struct LazyPager<Element, DataCollecton: RandomAccessCollection, Content:
     
     @State private var defaultPageInternal = 0
     private var providedPage: Binding<Int>?
-    private var zoomConfigGetter: (Element) -> ZoomConfig = { _ in .disabled }
     
     private var page: Binding<Int> {
         providedPage ?? Binding(
@@ -100,7 +101,7 @@ public struct LazyPager<Element, DataCollecton: RandomAccessCollection, Content:
         )
     }
     
-    var config = Config()
+    var config = Config<Element>()
     
     public init(data: DataCollecton,
                 page: Binding<Int>? = nil,
@@ -141,7 +142,7 @@ public extension LazyPager {
     
     func zoomable(min: CGFloat, max: CGFloat, doubleTapGesture: DoubleTap = .scale(0.5)) -> LazyPager {
         var this = self
-        this.zoomConfigGetter = { _ in
+        this.config.zoomConfigGetter = { _ in
             return .custom(min: min, max: max, doubleTap: doubleTapGesture)
         }
         return this
@@ -149,11 +150,11 @@ public extension LazyPager {
     
     func zoomable(onElement: @escaping (Element) -> ZoomConfig) -> LazyPager {
         var this = self
-        this.zoomConfigGetter = onElement
+        this.config.zoomConfigGetter = onElement
         return this
     }
     
-    func settings(_ adjust: @escaping (inout Config) -> ()) -> LazyPager {
+    func settings(_ adjust: @escaping (inout Config<Element>) -> ()) -> LazyPager {
         var this = self
         adjust(&this.config)
         return this
@@ -188,8 +189,7 @@ extension LazyPager: UIViewControllerRepresentable {
         return Coordinator(data: data,
                            page: page,
                            config: config,
-                           viewLoader: viewLoader,
-                           zoomConfigGetter: zoomConfigGetter
+                           viewLoader: viewLoader
         )
     }
 

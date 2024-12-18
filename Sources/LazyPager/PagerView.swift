@@ -24,7 +24,7 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
     
     var isFirstLoad = false
     var loadedViews = [ZoomableView<Element, Content>]()
-    var config: Config
+    var config: Config<Element>
     weak var viewLoader: Loader?
     
     var isRotating = false
@@ -37,7 +37,7 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
         }
     }
     
-    init(page: Binding<Int>, config: Config) {
+    init(page: Binding<Int>, config: Config<Element>) {
         self.currentIndex = page.wrappedValue
         self.page = page
         self.config = config

@@ -20,7 +20,7 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate {
     var contentBottomToFrame: NSLayoutConstraint!
     var contentBottomToView: NSLayoutConstraint!
     
-    var config: Config
+    var config: Config<Element>
     var bottomView: UIView
     
     var allowScroll: Bool = true {
@@ -52,18 +52,16 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate {
     var index: Int
     var data: Element
     var doubleTap: DoubleTap?
-    var zoomConfigGetter: (Element) -> ZoomConfig
     
     var view: UIView {
         return hostingController.view
     }
     
-    init(hostingController: UIHostingController<Content>, index: Int, data: Element, config: Config, zoomConfigGetter: @escaping (Element) -> ZoomConfig) {
+    init(hostingController: UIHostingController<Content>, index: Int, data: Element, config: Config<Element>) {
         self.index = index
         self.hostingController = hostingController
         self.data = data
         self.config = config
-        self.zoomConfigGetter = zoomConfigGetter
         
         let v = UIView()
         self.bottomView = v
@@ -138,7 +136,7 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate {
     }
     
     func updateZoomConfig() {
-        switch zoomConfigGetter(data) {
+        switch config.zoomConfigGetter(data) {
         case .disabled:
             maximumZoomScale = 1
             minimumZoomScale = 1
