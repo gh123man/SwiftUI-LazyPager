@@ -13,24 +13,23 @@ public class ViewDataProvider<Content: View, DataCollecton: RandomAccessCollecti
     
     var viewLoader: (Element) -> Content
     var data: DataCollecton
-    var config: Config
+    var config: Config<Element>
     var pagerView: PagerView<Element, ViewDataProvider, Content>
     
     var dataCount: Int {
         return data.count
     }
     
-    
     init(data: DataCollecton,
          page: Binding<Int>,
-         config: Config,
+         config: Config<Element>,
          viewLoader: @escaping (Element) -> Content) {
         
         self.data = data
         self.viewLoader = viewLoader
         self.config = config
         self.pagerView = PagerView(page: page, config: config)
-        
+
         super.init(nibName: nil, bundle: nil)
         self.pagerView.viewLoader = self
         

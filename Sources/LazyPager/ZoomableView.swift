@@ -20,7 +20,7 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate {
     var contentBottomToFrame: NSLayoutConstraint!
     var contentBottomToView: NSLayoutConstraint!
     
-    var config: Config
+    var config: Config<Element>
     var bottomView: UIView
     
     var allowScroll: Bool = true {
@@ -51,16 +51,18 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate {
     var hostingController: UIHostingController<Content>
     var index: Int
     var data: Element
+    var doubleTap: DoubleTap?
     
     var view: UIView {
         return hostingController.view
     }
     
-    init(hostingController: UIHostingController<Content>, index: Int, data: Element, config: Config) {
+    init(hostingController: UIHostingController<Content>, index: Int, data: Element, config: Config<Element>) {
         self.index = index
         self.hostingController = hostingController
         self.data = data
         self.config = config
+        
         let v = UIView()
         self.bottomView = v
         
@@ -68,8 +70,9 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate {
         
         translatesAutoresizingMaskIntoConstraints = false
         delegate = self
-        maximumZoomScale = config.maxZoom
-        minimumZoomScale = config.minZoom
+        
+        updateZoomConfig()
+        
         bouncesZoom = true
         backgroundColor = .clear
         alwaysBounceVertical = false
@@ -114,7 +117,7 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate {
         singleTapGesture.numberOfTouchesRequired = 1
         addGestureRecognizer(singleTapGesture)
         
-        if case .scale = config.doubleTapSetting {
+        if case .scale = doubleTap {
             let doubleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(onDoubleTap(_:)))
             doubleTapRecognizer.numberOfTapsRequired = 2
             doubleTapRecognizer.numberOfTouchesRequired = 1
@@ -132,12 +135,25 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate {
         fatalError("Not implemented")
     }
     
+    func updateZoomConfig() {
+        switch config.zoomConfigGetter(data) {
+        case .disabled:
+            maximumZoomScale = 1
+            minimumZoomScale = 1
+            doubleTap = nil
+        case let .custom(min, max, doubleTap):
+            minimumZoomScale = min
+            maximumZoomScale = max
+            self.doubleTap = doubleTap
+        }
+    }
+    
     @objc func singleTap(_ recognizer: UITapGestureRecognizer) {
         config.tapCallback?()
     }
     
     @objc func onDoubleTap(_ recognizer:UITapGestureRecognizer) {
-        if case let .scale(scale) = config.doubleTapSetting {
+        if case let .scale(scale) = doubleTap {
             let pointInView = recognizer.location(in: view)
             zoom(at: pointInView, scale: scale)
         }
@@ -145,6 +161,7 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate {
     
     func updateState() {
         
+        updateZoomConfig()
         allowScroll = zoomScale == 1
 
         if contentOffset.y > config.pinchGestureEnableOffset, allowScroll {
@@ -234,6 +251,8 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate {
         if zoomScale <= maximumZoomScale {
             contentInset = UIEdgeInsets(top: top - safeAreaInsets.top, left: left, bottom: top - safeAreaInsets.bottom, right: left)
         }
+        
+        config.onZoomHandler?(data, scrollView.zoomScale)
     }
     
     func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
