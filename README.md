@@ -134,13 +134,14 @@ For a full working example, [open the sample project](https://github.com/gh123ma
 - Horizontal or Vertical paging.
 - Lazy loaded views are disposed when they are outside of the pre-load frame to conserve resources. 
 - Enable zooming and panning with `.zoomable(min: CGFloat, max: CGFloat)`.
-- Double tap to zoom is also supported.
+- Double tap to zoom is also supported through `.zoomable` modifier.
 - Notifies when to load more content with `.shouldLoadMore`.
 - Notifies when you swipe past the beginning or end of data with `.overscroll`.
 - Animate page transitions by using `withAnimation` when changing the page index. 
 - Works with `.ignoresSafeArea()` (or not) to get a true full screen view.
 - Drag to dismiss is supported with `.onDismiss` - Supply a binding opacity value to control the background opacity during the transition. 
 - Tap events are handled internally, so use `.onTap` to handle single taps (useful for hiding and showing UI).
+- Use `.onDoubleTap` to get notified on double taps.
 - Use `.settings` to [modify advanced settings](https://github.com/gh123man/SwiftUI-LazyPager/blob/master/Sources/LazyPager/LazyPager.swift#L67).
 - Use `.absoluteContentPosition` to subscribe to content position updates (the index + the offset while paging)
 - Use `.onZoom` to get notified of the current zoom level

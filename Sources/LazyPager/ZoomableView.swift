@@ -152,7 +152,9 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate {
         config.tapCallback?()
     }
     
-    @objc func onDoubleTap(_ recognizer:UITapGestureRecognizer) {
+    @objc func onDoubleTap(_ recognizer: UITapGestureRecognizer) {
+        config.doubleTapCallback?()
+        
         if case let .scale(scale) = doubleTap {
             let pointInView = recognizer.location(in: view)
             zoom(at: pointInView, scale: scale)
