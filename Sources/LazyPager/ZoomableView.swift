@@ -116,14 +116,19 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate {
         singleTapGesture.numberOfTapsRequired = 1
         singleTapGesture.numberOfTouchesRequired = 1
         addGestureRecognizer(singleTapGesture)
-        
-        if case .scale = doubleTap {
+                
+        func setupDoubleTapGesture() {
             let doubleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(onDoubleTap(_:)))
             doubleTapRecognizer.numberOfTapsRequired = 2
             doubleTapRecognizer.numberOfTouchesRequired = 1
             addGestureRecognizer(doubleTapRecognizer)
             
             singleTapGesture.require(toFail: doubleTapRecognizer)
+        }
+        if case .scale = doubleTap {
+            setupDoubleTapGesture()
+        } else if config.doubleTapCallback != nil {
+            setupDoubleTapGesture()
         }
         
         DispatchQueue.main.async {
