@@ -112,18 +112,27 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate {
             v.heightAnchor.constraint(equalToConstant: constant)
         ])
         
-        let singleTapGesture = UITapGestureRecognizer(target: self, action: #selector(singleTap(_:)))
-        singleTapGesture.numberOfTapsRequired = 1
-        singleTapGesture.numberOfTouchesRequired = 1
-        addGestureRecognizer(singleTapGesture)
-        
-        if case .scale = doubleTap {
+        var singleTapGesture: UITapGestureRecognizer?
+        if config.tapCallback != nil {
+            let gesture = UITapGestureRecognizer(target: self, action: #selector(singleTap(_:)))
+            gesture.numberOfTapsRequired = 1
+            gesture.numberOfTouchesRequired = 1
+            addGestureRecognizer(gesture)
+            singleTapGesture = gesture
+        }
+                
+        func setupDoubleTapGesture() {
             let doubleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(onDoubleTap(_:)))
             doubleTapRecognizer.numberOfTapsRequired = 2
             doubleTapRecognizer.numberOfTouchesRequired = 1
-            addGestureRecognizer(doubleTapRecognizer)
-            
-            singleTapGesture.require(toFail: doubleTapRecognizer)
+            addGestureRecognizer(doubleTapRecognizer)            
+            singleTapGesture?.require(toFail: doubleTapRecognizer)
+        }
+        
+        if case .scale = doubleTap {
+            setupDoubleTapGesture()
+        } else if config.doubleTapCallback != nil {
+            setupDoubleTapGesture()
         }
         
         DispatchQueue.main.async {
@@ -152,7 +161,9 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate {
         config.tapCallback?()
     }
     
-    @objc func onDoubleTap(_ recognizer:UITapGestureRecognizer) {
+    @objc func onDoubleTap(_ recognizer: UITapGestureRecognizer) {
+        config.doubleTapCallback?()
+        
         if case let .scale(scale) = doubleTap {
             let pointInView = recognizer.location(in: view)
             zoom(at: pointInView, scale: scale)

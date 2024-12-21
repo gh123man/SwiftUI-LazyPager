@@ -59,6 +59,9 @@ struct FullTestView: View {
             .onTap {
                 print("tap")
             }
+            .onDoubleTap {
+                print("double tap")
+            }
             .shouldLoadMore(on: .lastElement(minus: 2)) {
                 data.append(Foo(img: "nora4", idx: data.count))
             }
