@@ -142,7 +142,7 @@ For a full working example, [open the sample project](https://github.com/gh123ma
 - Drag to dismiss is supported with `.onDismiss` - Supply a binding opacity value to control the background opacity during the transition. 
 - Tap events are handled internally, so use `.onTap` to handle single taps (useful for hiding and showing UI).
 - Use `.onDoubleTap` to get notified on double taps.
-- Use `.settings` to [modify advanced settings](https://github.com/gh123man/SwiftUI-LazyPager/blob/master/Sources/LazyPager/LazyPager.swift#L67).
+- Use `.settings` to [modify advanced settings](https://github.com/gh123man/SwiftUI-LazyPager/blob/master/Sources/LazyPager/LazyPager.swift#L70).
 - Use `.absoluteContentPosition` to subscribe to content position updates (the index + the offset while paging)
 - Use `.onZoom` to get notified of the current zoom level
 
