@@ -37,6 +37,27 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
         }
     }
     
+    var absoluteOffset: CGFloat {
+        var absoluteOffset: CGFloat
+        if config.direction == .horizontal {
+            absoluteOffset = self.contentOffset.x / self.frame.width
+        } else {
+            absoluteOffset = self.contentOffset.y / self.frame.height
+        }
+        return absoluteOffset
+    }
+    
+    var relativeIndex: Int {
+        var idx = Int(round(absoluteOffset))
+        idx = idx < 0 ? 0 : idx
+        idx = idx >= loadedViews.count ? loadedViews.count-1 : idx
+        return idx
+    }
+    
+    var currentView: ZoomableView<Element, Content> {
+        loadedViews[relativeIndex]
+    }
+    
     init(page: Binding<Int>, config: Config<Element>) {
         self.currentIndex = page.wrappedValue
         self.page = page
@@ -300,20 +321,8 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
     var scrollSettled = true
 
     public func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        var relativeIndex: Int
-        var absoluteOffset: CGFloat
-        if config.direction == .horizontal {
-            absoluteOffset = scrollView.contentOffset.x / scrollView.frame.width
-            relativeIndex = Int(round(absoluteOffset))
-        } else {
-            absoluteOffset = scrollView.contentOffset.y / scrollView.frame.height
-            relativeIndex = Int(round(absoluteOffset))
-        }
-        relativeIndex = relativeIndex < 0 ? 0 : relativeIndex
-        relativeIndex = relativeIndex >= loadedViews.count ? loadedViews.count-1 : relativeIndex
-        
         if !scrollView.isTracking, !isRotating  {
-            currentIndex = loadedViews[relativeIndex].index
+            currentIndex = currentView.index
             page.wrappedValue = currentIndex
         }
         
