@@ -19,6 +19,7 @@
 		D367DA132A59E930004497D4 /* LazyPager in Frameworks */ = {isa = PBXBuildFile; productRef = D367DA122A59E930004497D4 /* LazyPager */; };
 		D3776B5F2CF5658500AFB89D /* AnimatedPagerControlsExample.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3776B5E2CF5658500AFB89D /* AnimatedPagerControlsExample.swift */; };
 		D38D65E32C62E4B900AA140E /* LazyPager in Frameworks */ = {isa = PBXBuildFile; productRef = D38D65E22C62E4B900AA140E /* LazyPager */; };
+		D3B3AEAC2DBD500800AC1E33 /* EnvironmentExample.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3B3AEAB2DBD500500AC1E33 /* EnvironmentExample.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -53,6 +54,7 @@
 		D353FB752A52174C00C04ABE /* ImageScrollViewUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageScrollViewUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		D3776B5E2CF5658500AFB89D /* AnimatedPagerControlsExample.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimatedPagerControlsExample.swift; sourceTree = "<group>"; };
 		D38D65E02C62E47C00AA140E /* LazyPager */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = LazyPager; path = ..; sourceTree = "<group>"; };
+		D3B3AEAB2DBD500500AC1E33 /* EnvironmentExample.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnvironmentExample.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -106,6 +108,7 @@
 		D353FB572A52174B00C04ABE /* LazyPagerExampleApp */ = {
 			isa = PBXGroup;
 			children = (
+				D3B3AEAB2DBD500500AC1E33 /* EnvironmentExample.swift */,
 				D353FB582A52174B00C04ABE /* LazyPagerExampleApp.swift */,
 				D33F96FC2C62F582004D934A /* VerticalMediaPager.swift */,
 				D33BC0512B69E6EE004B4338 /* SimpleExample.swift */,
@@ -291,6 +294,7 @@
 				D33F96FD2C62F582004D934A /* VerticalMediaPager.swift in Sources */,
 				D3776B5F2CF5658500AFB89D /* AnimatedPagerControlsExample.swift in Sources */,
 				D33BC0522B69E6EE004B4338 /* SimpleExample.swift in Sources */,
+				D3B3AEAC2DBD500800AC1E33 /* EnvironmentExample.swift in Sources */,
 				D353FB592A52174B00C04ABE /* LazyPagerExampleApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

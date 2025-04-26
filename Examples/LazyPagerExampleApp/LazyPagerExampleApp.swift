@@ -18,6 +18,9 @@ struct LazyPagerApp: App {
                     NavigationLink(destination: SimpleExample()) {
                         Text("Simple Example")
                     }
+                    NavigationLink(destination: EnvironmentExample()) {
+                        Text("Environment Example")
+                    }
                     NavigationLink(destination: AnimatedPagerControlsExample()) {
                         Text("Animated Pager Controls Example")
                     }

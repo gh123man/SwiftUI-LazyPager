@@ -120,8 +120,6 @@ public struct LazyPager<Element, DataCollecton: RandomAccessCollection, Content:
         self.viewLoader = content
         self.config.direction = direction
     }
-
-    public class Coordinator: ViewDataProvider<Content, DataCollecton, Element> { }
 }
 
 public extension LazyPager {
@@ -197,24 +195,18 @@ public extension LazyPager {
 }
 
 extension LazyPager: UIViewControllerRepresentable {
-    
-    public func makeUIViewController(context: Context) -> Coordinator {
+    public func makeUIViewController(context: Context) -> ViewDataProvider<Content, DataCollecton, Element> {
+        let provider = ViewDataProvider(data: data,
+                                        page: page,
+                                        config: config,
+                                        viewLoader: viewLoader)
         DispatchQueue.main.async {
-            context.coordinator.goToPage(page.wrappedValue, animated: false)
+            provider.goToPage(page.wrappedValue, animated: false)
         }
-        return context.coordinator
+        return provider
     }
     
-    public func makeCoordinator() -> Coordinator {
-        return Coordinator(data: data,
-                           page: page,
-                           config: config,
-                           viewLoader: viewLoader
-        )
-    }
-
-    public func updateUIViewController(_ uiViewController: Coordinator, context: Context) {
-        
+    public func updateUIViewController(_ uiViewController: ViewDataProvider<Content, DataCollecton, Element>, context: Context) {
         uiViewController.viewLoader = viewLoader
         uiViewController.data = data
         defer { uiViewController.reloadViews() }
@@ -228,6 +220,5 @@ extension LazyPager: UIViewControllerRepresentable {
         } else if page.wrappedValue < 0 {
             uiViewController.goToPage(0, animated: false)
         }
-        
     }
 }
