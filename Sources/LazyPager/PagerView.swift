@@ -177,7 +177,6 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
             addFirstView(zoomView)
         }
         loadedViews.append(zoomView)
-        layoutSubviews()
     }
     
     func prependView(at index: Int) {
@@ -207,8 +206,6 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
         } else {
             addFirstView(zoomView)
         }
-        
-        layoutSubviews()
         
         loadedViews.insert(zoomView, at: 0)
         if config.direction == .horizontal {
