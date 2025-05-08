@@ -46,6 +46,9 @@ public struct Config<Element> {
     /// Called when tapping twice
     public var doubleTapCallback: (() -> ())?
     
+    /// Called when dragging begins
+    public var dragCallback: (() -> ())?
+    
     /// The offset used to trigger load loadMoreCallback
     public var loadMoreOn: LoadMore = .lastElement(minus: 3)
     
@@ -142,6 +145,12 @@ public extension LazyPager {
     func onDoubleTap(_ callback: @escaping () -> ()) -> LazyPager {
         var this = self
         this.config.doubleTapCallback = callback
+        return this
+    }
+    
+    func onDrag(_ callback: @escaping () -> ()) -> LazyPager {
+        var this = self
+        this.config.dragCallback = callback
         return this
     }
     

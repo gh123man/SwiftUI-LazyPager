@@ -72,6 +72,9 @@ struct FullTestView: View {
                     print("Swiped past end")
                 }
             }
+            .onDrag {
+                print("Drag")
+            }
             .background(.black.opacity(opacity))
             .background(ClearFullScreenBackground())
             .ignoresSafeArea()

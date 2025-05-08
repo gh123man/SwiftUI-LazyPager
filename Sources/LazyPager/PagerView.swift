@@ -316,9 +316,13 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
     var lastPos: CGFloat = 0
     var hasNotfiedOverscroll = false
     var scrollSettled = true
+    
+    func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+        config.dragCallback?()
+    }
 
     public func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        if !scrollView.isTracking, !isRotating  {
+        if !scrollView.isTracking, !isRotating, (currentView.index != page.wrappedValue || page.wrappedValue != currentIndex ) {
             currentIndex = currentView.index
             page.wrappedValue = currentIndex
         }
