@@ -104,7 +104,7 @@ var body: some View {
             print("double tap")
         }
         
-        // Handle drag events during page transitions
+        // Handle drag events initiated by the user
         .onDrag {
             print("Drag")
         }
@@ -155,7 +155,7 @@ For a full working example, [open the sample project](https://github.com/gh123ma
 - Use `.settings` to [modify advanced settings](https://github.com/gh123man/SwiftUI-LazyPager/blob/master/Sources/LazyPager/LazyPager.swift#L73).
 - Use `.absoluteContentPosition` to subscribe to content position updates (the index + the offset while paging)
 - Use `.onZoom` to get notified of the current zoom level
-- Use `.onDrag` to handle drag events during page transitions
+- Use `.onDrag` to handle drag events when the user interacts with the view. No triggered when page is changed programmatically.
 
 # Detailed usage
 
