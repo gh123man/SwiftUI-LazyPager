@@ -182,11 +182,9 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate {
         }
         
         if allowScroll {
-            // Counteract content inset adjustments. Makes .ignoresSafeArea() work
-
             if !isAnimating, config.dismissCallback != nil {
                 let offset = contentOffset.y
-                if offset < 0 {
+                if offset < safeAreaInsets.top + safeAreaInsets.bottom {
                     let absoluteDragOffset = normalize(from: 0, at: abs(offset), to: frame.size.height)
                     let fadeOffset = normalize(from: 0, at: absoluteDragOffset, to: config.fullFadeOnDragAt)
                     config.backgroundOpacity?.wrappedValue = 1 - fadeOffset
@@ -196,10 +194,7 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate {
                     }
                 }
             }
-            
             wasTracking = isTracking
-        } else {
-            contentInset = UIEdgeInsets(top: -safeAreaInsets.top, left: -safeAreaInsets.left, bottom: -safeAreaInsets.bottom, right: -safeAreaInsets.right)
         }
     }
     
