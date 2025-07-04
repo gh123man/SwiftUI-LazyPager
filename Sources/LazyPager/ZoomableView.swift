@@ -97,20 +97,20 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate {
         contentTopToFrame = view.topAnchor.constraint(equalTo: contentLayoutGuide.topAnchor)
         contentTopToContent = view.topAnchor.constraint(equalTo: topAnchor)
         contentBottomToFrame = view.bottomAnchor.constraint(equalTo: contentLayoutGuide.bottomAnchor)
-        contentBottomToView = view.bottomAnchor.constraint(equalTo: bottomView.topAnchor)
+        contentBottomToView = view.bottomAnchor.constraint(equalTo: bottomAnchor)
         
-        v.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(v)
+//        v.translatesAutoresizingMaskIntoConstraints = false
+//        addSubview(v)
         
         // This is for future support of a drawer view
-        let constant: CGFloat = config.dismissCallback == nil ? 0 : 1
+//        let constant: CGFloat = config.dismissCallback == nil ? 0 : 1
         
-        NSLayoutConstraint.activate([
-            v.bottomAnchor.constraint(equalTo: bottomAnchor),
-            v.leadingAnchor.constraint(equalTo: frameLayoutGuide.leadingAnchor),
-            v.trailingAnchor.constraint(equalTo: frameLayoutGuide.trailingAnchor),
-            v.heightAnchor.constraint(equalToConstant: constant)
-        ])
+//        NSLayoutConstraint.activate([
+//            v.bottomAnchor.constraint(equalTo: bottomAnchor),
+//            v.leadingAnchor.constraint(equalTo: frameLayoutGuide.leadingAnchor),
+//            v.trailingAnchor.constraint(equalTo: frameLayoutGuide.trailingAnchor),
+//            v.heightAnchor.constraint(equalToConstant: constant)
+//        ])
         
         var singleTapGesture: UITapGestureRecognizer?
         if config.tapCallback != nil {
@@ -183,7 +183,6 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate {
         
         if allowScroll {
             // Counteract content inset adjustments. Makes .ignoresSafeArea() work
-            contentInset = UIEdgeInsets(top: -safeAreaInsets.top, left: -safeAreaInsets.left, bottom: -safeAreaInsets.bottom, right: -safeAreaInsets.right)
 
             if !isAnimating, config.dismissCallback != nil {
                 let offset = contentOffset.y
@@ -199,6 +198,8 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate {
             }
             
             wasTracking = isTracking
+        } else {
+            contentInset = UIEdgeInsets(top: -safeAreaInsets.top, left: -safeAreaInsets.left, bottom: -safeAreaInsets.bottom, right: -safeAreaInsets.right)
         }
     }
     
