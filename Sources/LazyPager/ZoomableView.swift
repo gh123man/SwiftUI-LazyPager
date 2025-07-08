@@ -279,6 +279,8 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate {
                 self.config.backgroundOpacity?.wrappedValue = 0
             }
             
+            frame.origin.y = -contentOffset.y
+            
             UIView.animate(withDuration: self.config.dismissAnimationLength, animations: {
                 self.frame.origin = CGPoint(x: ogFram.x, y: self.frame.size.height)
             }) { _ in
