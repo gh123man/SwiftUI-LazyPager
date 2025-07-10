@@ -47,6 +47,8 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate {
     var isAnimating = false
     var isZoomHappening = false
     var lastInset: CGFloat = 0
+    var isAnimatingZoom = false
+    var currentZoomInsetAnimation: UIViewPropertyAnimator?
     
     var hostingController: UIHostingController<Content>
     var index: Int
@@ -236,36 +238,61 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate {
         return view
     }
     
-    func scrollViewDidZoom(_ scrollView: UIScrollView) {
-        
+    func handleZoom(scrollView: UIScrollView) {
         let w: CGFloat = view.intrinsicContentSize.width * UIScreen.main.scale
         let h: CGFloat = view.intrinsicContentSize.height * UIScreen.main.scale
-
+        
         let ratioW = view.frame.width / w
         let ratioH = view.frame.height / h
-
+        
         let ratio = ratioW < ratioH ? ratioW : ratioH
-
+        
         let newWidth = w*ratio
         let newHeight = h*ratio
-
+        
         let left = 0.5 * (newWidth * scrollView.zoomScale > view.frame.width
                           ? (newWidth - view.frame.width)
                           : (scrollView.frame.width - view.frame.width))
         let top = 0.5 * (newHeight * scrollView.zoomScale > view.frame.height
                          ? (newHeight - view.frame.height)
                          : (scrollView.frame.height - view.frame.height))
-
+        
         if zoomScale <= maximumZoomScale {
-            contentInset = UIEdgeInsets(
-                top: top - safeAreaInsets.top,
-                left: left - safeAreaInsets.left,
-                bottom: top - safeAreaInsets.bottom,
-                right: left - safeAreaInsets.right
+            
+            currentZoomInsetAnimation?.stopAnimation(true)
+            currentZoomInsetAnimation = nil
+            
+            if isAnimatingZoom {
+                return
+            }
+            isAnimatingZoom = true
+            
+            let targetInsets = UIEdgeInsets(
+                top: top - self.safeAreaInsets.top,
+                left: left - self.safeAreaInsets.left,
+                bottom: top - self.safeAreaInsets.bottom,
+                right: left - self.safeAreaInsets.right
             )
+            
+            // Use a shorter animation duration for better responsiveness
+            currentZoomInsetAnimation = UIViewPropertyAnimator(duration: 0.3, curve: .easeInOut) {
+                self.contentInset = targetInsets
+            }
+            
+            currentZoomInsetAnimation?.addCompletion { [weak self] _ in
+                self?.isAnimatingZoom = false
+                self?.currentZoomInsetAnimation = nil
+            }
+            
+            currentZoomInsetAnimation?.startAnimation()
         }
         config.onZoomHandler?(data, scrollView.zoomScale)
     }
+    
+    func scrollViewDidZoom(_ scrollView: UIScrollView) {
+        self.handleZoom(scrollView: scrollView)
+    }
+    
     
     func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
         
