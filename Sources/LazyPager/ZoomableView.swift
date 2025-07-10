@@ -184,10 +184,17 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate {
         }
         
         if allowScroll {
-            contentInset = UIEdgeInsets(top: -safeAreaInsets.top,
-                                        left: -safeAreaInsets.left,
-                                        bottom: -safeAreaInsets.bottom,
-                                        right: -safeAreaInsets.right)
+            if config.direction == .horizontal {
+                contentInset = UIEdgeInsets(top: -safeAreaInsets.top,
+                                            left: 0,
+                                            bottom: -safeAreaInsets.bottom,
+                                            right: 0)
+            } else {
+                contentInset = UIEdgeInsets(top: 0,
+                                            left: -safeAreaInsets.left,
+                                            bottom: 0,
+                                            right: -safeAreaInsets.right)
+            }
             if !isAnimating, config.dismissCallback != nil {
                 let offset = contentOffset.y
                 if offset < safeAreaInsets.top + safeAreaInsets.bottom {
