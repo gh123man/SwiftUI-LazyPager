@@ -99,20 +99,20 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate {
         contentTopToFrame = view.topAnchor.constraint(equalTo: contentLayoutGuide.topAnchor)
         contentTopToContent = view.topAnchor.constraint(equalTo: topAnchor)
         contentBottomToFrame = view.bottomAnchor.constraint(equalTo: contentLayoutGuide.bottomAnchor)
-        contentBottomToView = view.bottomAnchor.constraint(equalTo: bottomAnchor)
+        contentBottomToView = view.bottomAnchor.constraint(equalTo: bottomView.topAnchor)
         
-//        v.translatesAutoresizingMaskIntoConstraints = false
-//        addSubview(v)
-        
-        // This is for future support of a drawer view
-//        let constant: CGFloat = config.dismissCallback == nil ? 0 : 1
-        
-//        NSLayoutConstraint.activate([
-//            v.bottomAnchor.constraint(equalTo: bottomAnchor),
-//            v.leadingAnchor.constraint(equalTo: frameLayoutGuide.leadingAnchor),
-//            v.trailingAnchor.constraint(equalTo: frameLayoutGuide.trailingAnchor),
-//            v.heightAnchor.constraint(equalToConstant: constant)
-//        ])
+        v.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(v)
+
+//        This is for future support of a drawer view
+        let constant: CGFloat = config.dismissCallback == nil ? 0 : 1
+
+        NSLayoutConstraint.activate([
+          v.bottomAnchor.constraint(equalTo: bottomAnchor),
+          v.leadingAnchor.constraint(equalTo: frameLayoutGuide.leadingAnchor),
+          v.trailingAnchor.constraint(equalTo: frameLayoutGuide.trailingAnchor),
+          v.heightAnchor.constraint(equalToConstant: constant)
+        ])
         
         var singleTapGesture: UITapGestureRecognizer?
         if config.tapCallback != nil {
@@ -173,7 +173,6 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate {
     }
     
     func updateState() {
-        
         updateZoomConfig()
         allowScroll = zoomScale == 1
 
@@ -184,17 +183,6 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate {
         }
         
         if allowScroll {
-            if config.direction == .horizontal {
-                contentInset = UIEdgeInsets(top: -safeAreaInsets.top,
-                                            left: 0,
-                                            bottom: -safeAreaInsets.bottom,
-                                            right: 0)
-            } else {
-                contentInset = UIEdgeInsets(top: 0,
-                                            left: -safeAreaInsets.left,
-                                            bottom: 0,
-                                            right: -safeAreaInsets.right)
-            }
             if !isAnimating, config.dismissCallback != nil {
                 let offset = contentOffset.y
                 if offset < safeAreaInsets.top + safeAreaInsets.bottom {
@@ -269,9 +257,13 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate {
                          : (scrollView.frame.height - view.frame.height))
 
         if zoomScale <= maximumZoomScale {
-            contentInset = UIEdgeInsets(top: top - safeAreaInsets.top, left: left, bottom: top - safeAreaInsets.bottom, right: left)
+            contentInset = UIEdgeInsets(
+                top: top - safeAreaInsets.top,
+                left: left - safeAreaInsets.left,
+                bottom: top - safeAreaInsets.bottom,
+                right: left - safeAreaInsets.right
+            )
         }
-        
         config.onZoomHandler?(data, scrollView.zoomScale)
     }
     

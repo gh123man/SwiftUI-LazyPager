@@ -13,7 +13,7 @@ struct LazyPagerApp: App {
     
     var body: some Scene {
         WindowGroup {
-            NavigationView {
+            NavigationStack {
                 VStack(spacing: 20) {
                     NavigationLink(destination: SimpleExample()) {
                         Text("Simple Example")

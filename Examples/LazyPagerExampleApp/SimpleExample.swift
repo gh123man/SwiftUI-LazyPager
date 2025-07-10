@@ -21,6 +21,8 @@ struct SimpleExample: View {
                 .resizable()
                 .aspectRatio(contentMode: .fit)
         }
+        .onDismiss {
+        }
     }
 }
 
