@@ -85,6 +85,8 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate {
         
         view.translatesAutoresizingMaskIntoConstraints = false
         view.backgroundColor = .clear
+        // DEBUG
+//        backgroundColor = .red
         addSubview(view)
         
         NSLayoutConstraint.activate([
@@ -182,6 +184,10 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate {
         }
         
         if allowScroll {
+            contentInset = UIEdgeInsets(top: -safeAreaInsets.top,
+                                        left: -safeAreaInsets.left,
+                                        bottom: -safeAreaInsets.bottom,
+                                        right: -safeAreaInsets.right)
             if !isAnimating, config.dismissCallback != nil {
                 let offset = contentOffset.y
                 if offset < safeAreaInsets.top + safeAreaInsets.bottom {

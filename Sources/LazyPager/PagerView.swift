@@ -69,6 +69,8 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
         backgroundColor = .clear
         isPagingEnabled = true
         delegate = self
+        // DEBUG
+//        backgroundColor = .blue
     }
     
     
@@ -119,6 +121,17 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
             }
         }
         self.removeOutOfFrameViews()
+        if config.direction == .horizontal {
+            contentInset = UIEdgeInsets(top: 0,
+                                        left: -safeAreaInsets.left,
+                                        bottom: 0,
+                                        right: -safeAreaInsets.right)
+        } else {
+            contentInset = UIEdgeInsets(top: -safeAreaInsets.top,
+                                        left: 0,
+                                        bottom: -safeAreaInsets.bottom,
+                                        right: 0)
+        }
         
         // Debug
 //         print(self.loadedViews.map { $0.index })
@@ -144,9 +157,7 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
             zoomView.bottomConstraint = zoomView.bottomAnchor.constraint(equalTo: bottomAnchor)
             zoomView.topConstraint?.isActive = true
             zoomView.bottomConstraint?.isActive = true
-
         }
-        
     }
     
     func appendView(at index: Int) {
