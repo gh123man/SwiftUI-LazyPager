@@ -54,6 +54,7 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate {
     var index: Int
     var data: Element
     var doubleTap: DoubleTap?
+    var lastBoundsSize: CGSize?
     
     var view: UIView {
         return hostingController.view
@@ -214,8 +215,12 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate {
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        
-        scrollViewDidZoom(self)
+        // Ensures insets are updated when the screen rotates
+        if bounds.size != lastBoundsSize {
+            lastBoundsSize = bounds.size
+            print("update insets")
+            updateInsets()
+        }
     }
     
     // MARK: UIScrollViewDelegate methods
@@ -228,6 +233,7 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate {
     func scrollViewDidEndZooming(_ scrollView: UIScrollView, with view: UIView?, atScale scale: CGFloat) {
         isZoomHappening = false
         updateState()
+        updateInsets()
     }
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
@@ -238,7 +244,7 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate {
         return view
     }
     
-    func handleZoom(scrollView: UIScrollView) {
+    func updateInsets() {
         let w: CGFloat = view.intrinsicContentSize.width * UIScreen.main.scale
         let h: CGFloat = view.intrinsicContentSize.height * UIScreen.main.scale
         
@@ -250,23 +256,14 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate {
         let newWidth = w*ratio
         let newHeight = h*ratio
         
-        let left = 0.5 * (newWidth * scrollView.zoomScale > view.frame.width
+        let left = 0.5 * (newWidth * zoomScale > view.frame.width
                           ? (newWidth - view.frame.width)
-                          : (scrollView.frame.width - view.frame.width))
-        let top = 0.5 * (newHeight * scrollView.zoomScale > view.frame.height
+                          : (frame.width - view.frame.width))
+        let top = 0.5 * (newHeight * zoomScale > view.frame.height
                          ? (newHeight - view.frame.height)
-                         : (scrollView.frame.height - view.frame.height))
+                         : (frame.height - view.frame.height))
         
         if zoomScale <= maximumZoomScale {
-            
-            currentZoomInsetAnimation?.stopAnimation(true)
-            currentZoomInsetAnimation = nil
-            
-            if isAnimatingZoom {
-                return
-            }
-            isAnimatingZoom = true
-            
             let targetInsets = UIEdgeInsets(
                 top: top - self.safeAreaInsets.top,
                 left: left - self.safeAreaInsets.left,
@@ -274,23 +271,22 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate {
                 right: left - self.safeAreaInsets.right
             )
             
-            // Use a shorter animation duration for better responsiveness
-            currentZoomInsetAnimation = UIViewPropertyAnimator(duration: 0.3, curve: .easeInOut) {
+            UIView.animate(withDuration: 0.3) {
                 self.contentInset = targetInsets
             }
-            
-            currentZoomInsetAnimation?.addCompletion { [weak self] _ in
-                self?.isAnimatingZoom = false
-                self?.currentZoomInsetAnimation = nil
-            }
-            
-            currentZoomInsetAnimation?.startAnimation()
         }
-        config.onZoomHandler?(data, scrollView.zoomScale)
     }
     
     func scrollViewDidZoom(_ scrollView: UIScrollView) {
-        self.handleZoom(scrollView: scrollView)
+
+        let scrollViewSize = scrollView.bounds.size
+        let zoomViewSize = view.frame.size
+
+        let horizontalInset = max(0, (scrollViewSize.width - zoomViewSize.width) / 2)
+        let verticalInset = max(0, (scrollViewSize.height - zoomViewSize.height) / 2)
+
+        scrollView.contentInset = UIEdgeInsets(top: verticalInset, left: horizontalInset, bottom: verticalInset, right: horizontalInset)
+        config.onZoomHandler?(data, scrollView.zoomScale)
     }
     
     
