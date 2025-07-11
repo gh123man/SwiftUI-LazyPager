@@ -218,7 +218,6 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate {
         // Ensures insets are updated when the screen rotates
         if bounds.size != lastBoundsSize {
             lastBoundsSize = bounds.size
-            print("update insets")
             updateInsets()
         }
     }
