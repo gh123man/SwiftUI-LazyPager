@@ -188,7 +188,7 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate {
         if allowScroll {
             if !isAnimating, config.dismissCallback != nil {
                 let offset = contentOffset.y
-                if offset < safeAreaInsets.top + safeAreaInsets.bottom {
+                if offset < 0 {
                     let absoluteDragOffset = normalize(from: 0, at: abs(offset), to: frame.size.height)
                     let fadeOffset = normalize(from: 0, at: absoluteDragOffset, to: config.fullFadeOnDragAt)
                     config.backgroundOpacity?.wrappedValue = 1 - fadeOffset
