@@ -44,10 +44,9 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate {
     }
     
     var wasTracking = false
-    var isAnimating = false
     var isZoomHappening = false
+    var dismissEnabled = false // Contorlled by PagerView to prevent flicker
     var lastInset: CGFloat = 0
-    var isAnimatingZoom = false
     var currentZoomInsetAnimation: UIViewPropertyAnimator?
     
     var hostingController: UIHostingController<Content>
@@ -186,7 +185,7 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate {
         }
         
         if allowScroll {
-            if !isAnimating, config.dismissCallback != nil {
+            if dismissEnabled, config.dismissCallback != nil {
                 let offset = contentOffset.y
                 if offset < 0 {
                     let absoluteDragOffset = normalize(from: 0, at: abs(offset), to: frame.size.height)
@@ -299,7 +298,7 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate {
            velocity.y < -config.dismissVelocity,
            config.dismissCallback != nil {
             
-            isAnimating = true
+            dismissEnabled = false // prevent touch interaction from messing with animation of opacity.
             let ogFram = frame.origin
             
             withAnimation(.linear(duration: self.config.dismissAnimationLength)) {

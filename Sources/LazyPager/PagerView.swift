@@ -308,6 +308,7 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
         } else {
             setContentOffset(CGPoint(x: contentOffset.x, y: CGFloat(index) * frame.size.height), animated: animated)
         }
+        self.currentView.dismissEnabled = true
     }
     
     func loadMoreIfNeeded() {
@@ -326,7 +327,6 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
     
     var lastPos: CGFloat = 0
     var hasNotfiedOverscroll = false
-    var scrollSettled = true
     
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
         config.dragCallback?()
@@ -354,6 +354,8 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
             }
         }
         
+        self.currentView.dismissEnabled = false
+        
         // Horribly janky way to detect when scrolling (both touching and animation) is finnished.
         let caputred: CGFloat
         
@@ -368,7 +370,7 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
             if self.lastPos == caputred, !scrollView.isTracking {
                 self.hasNotfiedOverscroll = false
                 self.resizeOutOfBoundsViews()
-                self.scrollSettled = true
+                self.currentView.dismissEnabled = true
             }
         }
     }
