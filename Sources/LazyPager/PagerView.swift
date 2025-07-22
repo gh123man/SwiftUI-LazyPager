@@ -32,7 +32,6 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
     
     var currentIndex: Int = 0 {
         didSet {
-            computeViewState()
             loadMoreIfNeeded()
         }
     }
@@ -96,10 +95,10 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
         
         if subviews.isEmpty {
             for i in currentIndex...(currentIndex + config.preloadAmount) {
-                appendView(at: i)
+                scheduleAppend(at: i)
             }
             for i in ((currentIndex - config.preloadAmount)..<currentIndex).reversed() {
-                prependView(at: i)
+                schedulePrepend(at: i)
             }
         }
         
@@ -107,7 +106,7 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
             let diff = lastView.index - currentIndex
             if diff < (config.preloadAmount) {
                 for i in lastView.index..<(lastView.index + (config.preloadAmount - diff)) {
-                    appendView(at: i + 1)
+                    scheduleAppend(at: i + 1)
                 }
             }
         }
@@ -116,7 +115,7 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
             let diff = currentIndex - firstView.index
             if diff < (config.preloadAmount) {
                 for i in (firstView.index - (config.preloadAmount - diff)..<firstView.index).reversed() {
-                    prependView(at: i)
+                    schedulePrepend(at: i)
                 }
             }
         }
@@ -160,6 +159,17 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
         }
     }
     
+    func scheduleAppend(at index: Int) {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            // Ensure we are not trying to add a view that has already been loaded
+            if self.loadedViews.contains(where: { $0.index == index }) {
+                return
+            }
+            self.appendView(at: index)
+        }
+    }
+    
     func appendView(at index: Int) {
         guard let zoomView = viewLoader?.loadView(at: index) else { return }
         
@@ -188,6 +198,17 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
             addFirstView(zoomView)
         }
         loadedViews.append(zoomView)
+    }
+    
+    func schedulePrepend(at index: Int) {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            // Ensure we are not trying to add a view that has already been loaded
+            if self.loadedViews.contains(where: { $0.index == index }) {
+                return
+            }
+            self.prependView(at: index)
+        }
     }
     
     func prependView(at index: Int) {
@@ -323,6 +344,22 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
         }
     }
     
+    func scrollingFinished() {
+        let newIndex = currentView.index
+        
+        if currentIndex != newIndex {
+            currentIndex = newIndex
+            page.wrappedValue = newIndex
+        }
+        
+        computeViewState()
+        
+        hasNotfiedOverscroll = false
+        resizeOutOfBoundsViews()
+        if loadedViews.isEmpty { return }
+        currentView.dismissEnabled = true
+    }
+    
     // MARK: UISCrollVieDelegate methods
     
     var lastPos: CGFloat = 0
@@ -333,9 +370,14 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
     }
 
     public func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        if !scrollView.isTracking, !isRotating, (currentView.index != page.wrappedValue || page.wrappedValue != currentIndex ) {
-            currentIndex = currentView.index
-            page.wrappedValue = currentIndex
+        
+        let newIndex = currentView.index
+        if currentIndex != newIndex {
+            currentIndex = newIndex
+            // To avoid modifying binding during view update
+            DispatchQueue.main.async {
+                self.page.wrappedValue = newIndex
+            }
         }
         
         if let index = loadedViews[safe: relativeIndex]?.index {
@@ -354,24 +396,17 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
             }
         }
         
+        if loadedViews.isEmpty { return }
         self.currentView.dismissEnabled = false
-        
-        // Horribly janky way to detect when scrolling (both touching and animation) is finnished.
-        let caputred: CGFloat
-        
-        if config.direction == .horizontal {
-            caputred = scrollView.contentOffset.x
-        } else {
-            caputred = scrollView.contentOffset.y
+    }
+    
+    public func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        if !decelerate {
+            scrollingFinished()
         }
-        
-        lastPos = caputred
-        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(100)) {
-            if self.lastPos == caputred, !scrollView.isTracking {
-                self.hasNotfiedOverscroll = false
-                self.resizeOutOfBoundsViews()
-                self.currentView.dismissEnabled = true
-            }
-        }
+    }
+    
+    public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        scrollingFinished()
     }
 }
