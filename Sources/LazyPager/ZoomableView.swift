@@ -9,7 +9,7 @@ import Foundation
 import UIKit
 import SwiftUI
 
-class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate {
+class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelegate {
     
     var trailingConstraint: NSLayoutConstraint?
     var leadingConstraint: NSLayoutConstraint?
@@ -72,6 +72,7 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate {
         
         translatesAutoresizingMaskIntoConstraints = false
         delegate = self
+        panGestureRecognizer.delegate = self
         
         updateZoomConfig()
         
@@ -87,6 +88,7 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate {
         
         view.translatesAutoresizingMaskIntoConstraints = false
         view.backgroundColor = .clear
+        decelerationRate = .fast
         // DEBUG
 //        backgroundColor = .red
         addSubview(view)
@@ -171,6 +173,7 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate {
         if case let .scale(scale) = doubleTap {
             let pointInView = recognizer.location(in: view)
             zoom(at: pointInView, scale: scale)
+            updateInsets()
         }
     }
     
@@ -321,5 +324,87 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate {
                 }
             }
         }
+    }
+    
+    // MARK: UIGestureRecognizerDelegate
+    
+    override func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        // We only want to intercept our own pan gesture.
+        guard gestureRecognizer == self.panGestureRecognizer else {
+            return true
+        }
+
+        let panGesture = self.panGestureRecognizer
+        let velocity = panGesture.velocity(in: self)
+
+        // This logic is for the horizontal pager.
+        if config.direction == .horizontal {
+            // If the swipe is mostly vertical, it's for dismissal. Let it happen.
+            if abs(velocity.y) > abs(velocity.x) {
+                return true
+            }
+
+            // It's a horizontal swipe. Should we let our own pan gesture begin?
+
+            // If not zoomed, NO. The pager should handle all horizontal movement.
+            if zoomScale <= minimumZoomScale {
+                return false // Prevent our pan, let PagerView handle it.
+            }
+
+            // If we ARE zoomed, check if we're at the horizontal edges.
+            let maxOffsetX = contentSize.width - bounds.width + contentInset.right
+            let minOffsetX = -contentInset.left
+            
+            let isAtRightEdge = contentOffset.x >= maxOffsetX - 1.0
+            let isAtLeftEdge = contentOffset.x <= minOffsetX + 1.0
+
+            // At the right edge and trying to swipe left (to the next page).
+            if isAtRightEdge && velocity.x < 0 {
+                return false // Prevent our pan, let PagerView handle it.
+            }
+
+            // At the left edge and trying to swipe right (to the previous page).
+            if isAtLeftEdge && velocity.x > 0 {
+                return false // Prevent our pan, let PagerView handle it.
+            }
+        } else { // Vertical Pager
+            // If the swipe is mostly horizontal, let it happen.
+            if abs(velocity.x) > abs(velocity.y) {
+                return true
+            }
+
+            // It's a vertical swipe. Should we let our own pan gesture begin?
+
+            // If not zoomed, NO. The pager should handle all vertical movement.
+            if zoomScale <= minimumZoomScale {
+                return false // Prevent our pan, let PagerView handle it.
+            }
+
+            // If we ARE zoomed, check if we're at the vertical edges.
+            let maxOffsetY = contentSize.height - bounds.height + contentInset.bottom
+            let minOffsetY = -contentInset.top
+
+            let isAtBottomEdge = contentOffset.y >= maxOffsetY - 1.0
+            let isAtTopEdge = contentOffset.y <= minOffsetY + 1.0
+
+            // At the bottom edge and trying to swipe up (to the next page).
+            if isAtBottomEdge && velocity.y < 0 {
+                return false // Prevent our pan, let PagerView handle it.
+            }
+
+            // At the top edge and trying to swipe down (to the previous page).
+            if isAtTopEdge && velocity.y > 0 {
+                return false // Prevent our pan, let PagerView handle it.
+            }
+        }
+        
+        // If we're not at an edge while zoomed, our pan gesture should begin.
+        return true
+    }
+
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        // We no longer need simultaneous recognition. This simplifies the logic and
+        // prevents the differential panning issues.
+        return false
     }
 }
