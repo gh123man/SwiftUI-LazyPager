@@ -96,6 +96,9 @@ public struct Config<Element> {
     
     /// % ammount (from 0-1) of overscroll needed to call overscrollCallback
     public var overscrollThreshold: Double = 0.15
+    
+    /// The spacing between pages. Defaults to 0.
+    public var pageSpacing: CGFloat = 0
 }
 
 public struct LazyPager<Element, DataCollecton: RandomAccessCollection, Content: View> where DataCollecton.Index == Int, DataCollecton.Element == Element {
@@ -151,6 +154,12 @@ public extension LazyPager {
     func onDrag(_ callback: @escaping () -> ()) -> LazyPager {
         var this = self
         this.config.dragCallback = callback
+        return this
+    }
+    
+    func pageSpacing(_ spacing: CGFloat) -> LazyPager {
+        var this = self
+        this.config.pageSpacing = spacing
         return this
     }
     

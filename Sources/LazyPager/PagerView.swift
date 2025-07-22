@@ -23,7 +23,9 @@ protocol ViewLoader: AnyObject {
 class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScrollViewDelegate where Loader.Element == Element, Loader.Content == Content {
     
     
-    let pageSpacing: CGFloat = 20
+    var pageSpacing: CGFloat {
+        config.pageSpacing
+    }
     var isFirstLoad = false
     var loadedViews = [ZoomableView<Element, Content>]()
     var config: Config<Element>

@@ -109,6 +109,9 @@ var body: some View {
             print("Drag")
         }
 
+        // Set the spacing between pages
+        .pageSpacing(20)
+
         // Set the background color with the drag opacity control
         .background(.black.opacity(opacity))
 
@@ -156,6 +159,7 @@ For a full working example, [open the sample project](https://github.com/gh123ma
 - Use `.absoluteContentPosition` to subscribe to content position updates (the index + the offset while paging)
 - Use `.onZoom` to get notified of the current zoom level
 - Use `.onDrag` to handle drag events when the user interacts with the view. No triggered when page is changed programmatically.
+- Use `.pageSpacing(CGFloat)` to set the spacing between pages.
 
 # Detailed usage
 
