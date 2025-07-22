@@ -105,7 +105,7 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
         }
     }
     
-    func computeViewState() {
+    func computeViewState(immediate: Bool = false) {
         delegate = nil
         DispatchQueue.main.async {
             self.delegate = self
@@ -113,10 +113,18 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
         
         if subviews.isEmpty {
             for i in currentIndex...(currentIndex + config.preloadAmount) {
-                scheduleAppend(at: i)
+                if immediate {
+                    appendView(at: i)
+                } else {
+                    scheduleAppend(at: i)
+                }
             }
             for i in ((currentIndex - config.preloadAmount)..<currentIndex).reversed() {
-                schedulePrepend(at: i)
+                if immediate {
+                    schedulePrepend(at: i)
+                } else {
+                    prependView(at: i)
+                }
             }
         }
         
@@ -124,7 +132,11 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
             let diff = lastView.index - currentIndex
             if diff < (config.preloadAmount) {
                 for i in lastView.index..<(lastView.index + (config.preloadAmount - diff)) {
-                    scheduleAppend(at: i + 1)
+                    if immediate {
+                        appendView(at: i + 1)
+                    } else {
+                        scheduleAppend(at: i + 1)
+                    }
                 }
             }
         }
@@ -133,7 +145,11 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
             let diff = currentIndex - firstView.index
             if diff < (config.preloadAmount) {
                 for i in (firstView.index - (config.preloadAmount - diff)..<firstView.index).reversed() {
-                    schedulePrepend(at: i)
+                    if immediate {
+                        schedulePrepend(at: i)
+                    } else {
+                        prependView(at: i)
+                    }
                 }
             }
         }
@@ -350,6 +366,7 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
     func goToPage(_ page: Int, animated: Bool) {
         currentIndex = page
         DispatchQueue.main.async {
+            self.computeViewState(immediate: true)
             self.ensureCurrentPage(animated: animated)
         }
     }
