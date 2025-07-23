@@ -51,6 +51,9 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
     }
     
     var relativeIndex: Int {
+        if absoluteOffset == .infinity || absoluteOffset == .nan {
+            return 0
+        }
         var idx = Int(round(absoluteOffset))
         idx = idx < 0 ? 0 : idx
         idx = idx >= loadedViews.count ? loadedViews.count-1 : idx
