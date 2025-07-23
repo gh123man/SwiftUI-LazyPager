@@ -423,13 +423,9 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
 
     public func scrollViewDidScroll(_ scrollView: UIScrollView) {
         
-        let newIndex = currentView.index
-        if currentIndex != newIndex {
-            currentIndex = newIndex
-            // To avoid modifying binding during view update
-            DispatchQueue.main.async {
-                self.page.wrappedValue = newIndex
-            }
+        if !scrollView.isTracking, !isRotating, (currentView.index != page.wrappedValue || page.wrappedValue != currentIndex ) {
+            currentIndex = currentView.index
+            page.wrappedValue = currentIndex
         }
         
         if let index = loadedViews[safe: relativeIndex]?.index {

@@ -74,6 +74,7 @@ public class ViewDataProvider<Content: View, DataCollecton: RandomAccessCollecti
         super.viewWillTransition(to: size, with: coordinator)
         
         pagerView.isRotating = true
+        self.pagerView.scrollingFinished()
         coordinator.animate(alongsideTransition: { context in }, completion: { context in
             self.pagerView.isRotating = false
             DispatchQueue.main.async {
