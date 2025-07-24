@@ -70,6 +70,9 @@ public struct Config<Element> {
     /// Called while zooming to provide the current zoom level for an element
     public var onZoomHandler: ((Element, CGFloat) -> ())?
 
+    /// The spacing between pages. Defaults to 0.
+    public var pageSpacing: CGFloat = 0
+
     /// Advanced settings (only accessibleevia .settings)
     
     /// How may out of view pages to load in advance (forward and backwards)
@@ -96,9 +99,6 @@ public struct Config<Element> {
     
     /// % ammount (from 0-1) of overscroll needed to call overscrollCallback
     public var overscrollThreshold: Double = 0.15
-    
-    /// The spacing between pages. Defaults to 0.
-    public var pageSpacing: CGFloat = 0
 }
 
 public struct LazyPager<Element, DataCollecton: RandomAccessCollection, Content: View> where DataCollecton.Index == Int, DataCollecton.Element == Element {

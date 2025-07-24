@@ -72,6 +72,9 @@ struct FullTestView: View {
                     print("Swiped past end")
                 }
             }
+            .onDrag {
+                print("Drag")
+            }
             .pageSpacing(10)
             .background(.black.opacity(opacity))
             .background(ClearFullScreenBackground())
