@@ -75,6 +75,7 @@ struct FullTestView: View {
             .onDrag {
                 print("Drag")
             }
+            .pageSpacing(10)
             .background(.black.opacity(opacity))
             .background(ClearFullScreenBackground())
             .ignoresSafeArea()

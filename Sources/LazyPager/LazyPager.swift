@@ -70,6 +70,9 @@ public struct Config<Element> {
     /// Called while zooming to provide the current zoom level for an element
     public var onZoomHandler: ((Element, CGFloat) -> ())?
 
+    /// The spacing between pages. Defaults to 0.
+    public var pageSpacing: CGFloat = 0
+
     /// Advanced settings (only accessibleevia .settings)
     
     /// How may out of view pages to load in advance (forward and backwards)
@@ -151,6 +154,12 @@ public extension LazyPager {
     func onDrag(_ callback: @escaping () -> ()) -> LazyPager {
         var this = self
         this.config.dragCallback = callback
+        return this
+    }
+    
+    func pageSpacing(_ spacing: CGFloat) -> LazyPager {
+        var this = self
+        this.config.pageSpacing = spacing
         return this
     }
     
