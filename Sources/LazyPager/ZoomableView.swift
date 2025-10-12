@@ -269,7 +269,7 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate, 
                 top: top,
                 left: left,
                 bottom: top,
-                right: left,
+                right: left
             )
             
             UIView.animate(withDuration: 0.3) {
