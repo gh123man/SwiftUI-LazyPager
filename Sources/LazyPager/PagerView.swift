@@ -411,6 +411,7 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
     }
     
     func scrollingFinished() {
+        if loadedViews.isEmpty { return }
         let newIndex = currentView.index
         
         if currentIndex != newIndex {
@@ -436,6 +437,7 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
     }
 
     public func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        if loadedViews.isEmpty { return }
         
         if !scrollView.isTracking, !isRotating, (currentView.index != page.wrappedValue || page.wrappedValue != currentIndex ) {
             currentIndex = currentView.index
