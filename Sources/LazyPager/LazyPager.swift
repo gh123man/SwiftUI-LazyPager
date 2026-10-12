@@ -214,14 +214,10 @@ public extension LazyPager {
 
 extension LazyPager: UIViewControllerRepresentable {
     public func makeUIViewController(context: Context) -> ViewDataProvider<Content, DataCollecton, Element> {
-        let provider = ViewDataProvider(data: data,
-                                        page: page,
-                                        config: config,
-                                        viewLoader: viewLoader)
-        DispatchQueue.main.async {
-            provider.goToPage(page.wrappedValue, animated: false)
-        }
-        return provider
+        return ViewDataProvider(data: data,
+                                page: page,
+                                config: config,
+                                viewLoader: viewLoader)
     }
     
     public func updateUIViewController(_ uiViewController: ViewDataProvider<Content, DataCollecton, Element>, context: Context) {

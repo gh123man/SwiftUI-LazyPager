@@ -33,7 +33,7 @@ public class ViewDataProvider<Content: View, DataCollecton: RandomAccessCollecti
         super.init(nibName: nil, bundle: nil)
         self.pagerView.viewLoader = self
         
-        pagerView.computeViewState()
+        pagerView.computeViewState(immediate: true)
     }
     
     required init?(coder: NSCoder) {
