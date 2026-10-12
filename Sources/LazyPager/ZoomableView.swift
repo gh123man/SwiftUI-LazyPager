@@ -54,6 +54,9 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate, 
     var data: Element
     var doubleTap: DoubleTap?
     var lastBoundsSize: CGSize?
+    var singleTapGesture: UITapGestureRecognizer?
+    var doubleTapRecognizer: UITapGestureRecognizer?
+    var gesturesReady = false
     
     var view: UIView {
         return hostingController.view
@@ -118,7 +121,6 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate, 
           v.heightAnchor.constraint(equalToConstant: constant)
         ])
         
-        var singleTapGesture: UITapGestureRecognizer?
         if config.tapCallback != nil {
             let gesture = UITapGestureRecognizer(target: self, action: #selector(singleTap(_:)))
             gesture.numberOfTapsRequired = 1
@@ -127,13 +129,7 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate, 
             singleTapGesture = gesture
         }
                 
-        func setupDoubleTapGesture() {
-            let doubleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(onDoubleTap(_:)))
-            doubleTapRecognizer.numberOfTapsRequired = 2
-            doubleTapRecognizer.numberOfTouchesRequired = 1
-            addGestureRecognizer(doubleTapRecognizer)            
-            singleTapGesture?.require(toFail: doubleTapRecognizer)
-        }
+        gesturesReady = true
         
         if case .scale = doubleTap {
             setupDoubleTapGesture()
@@ -150,6 +146,16 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate, 
         fatalError("Not implemented")
     }
     
+    func setupDoubleTapGesture() {
+        guard doubleTapRecognizer == nil else { return }
+        let recognizer = UITapGestureRecognizer(target: self, action: #selector(onDoubleTap(_:)))
+        recognizer.numberOfTapsRequired = 2
+        recognizer.numberOfTouchesRequired = 1
+        addGestureRecognizer(recognizer)
+        singleTapGesture?.require(toFail: recognizer)
+        doubleTapRecognizer = recognizer
+    }
+    
     func updateZoomConfig() {
         switch config.zoomConfigGetter(data) {
         case .disabled:
@@ -160,6 +166,9 @@ class ZoomableView<Element, Content: View>: UIScrollView, UIScrollViewDelegate, 
             minimumZoomScale = min
             maximumZoomScale = max
             self.doubleTap = doubleTap
+            if gesturesReady, case .scale = doubleTap {
+                setupDoubleTapGesture()
+            }
         }
     }
     
