@@ -49,6 +49,9 @@ public struct Config<Element> {
     /// Called when dragging begins
     public var dragCallback: (() -> ())?
     
+    /// Called with true when a page drag begins and false when scrolling settles
+    public var scrollActiveCallback: ((Bool) -> ())?
+    
     /// The offset used to trigger load loadMoreCallback
     public var loadMoreOn: LoadMore = .lastElement(minus: 3)
     
@@ -154,6 +157,12 @@ public extension LazyPager {
     func onDrag(_ callback: @escaping () -> ()) -> LazyPager {
         var this = self
         this.config.dragCallback = callback
+        return this
+    }
+    
+    func onScrollActive(_ callback: @escaping (Bool) -> ()) -> LazyPager {
+        var this = self
+        this.config.scrollActiveCallback = callback
         return this
     }
     

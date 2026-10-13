@@ -411,6 +411,7 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
     }
     
     func scrollingFinished() {
+        config.scrollActiveCallback?(false)
         if loadedViews.isEmpty { return }
         let newIndex = currentView.index
         
@@ -434,6 +435,7 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
     
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
         config.dragCallback?()
+        config.scrollActiveCallback?(true)
     }
 
     public func scrollViewDidScroll(_ scrollView: UIScrollView) {
