@@ -34,6 +34,7 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
     
     var isRotating = false
     var anchoredPageDimension: CGFloat = 0
+    var pendingJump = false
     var page: Binding<Int>
     
     var currentIndex: Int = 0 {
@@ -124,7 +125,9 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
         }
     }
     
-    func computeViewState(immediate: Bool = false) {
+    func computeViewState(immediate: Bool = false, prependsNow: Bool = false) {
+        // A jump builds its own window
+        if pendingJump && !immediate { return }
         delegate = nil
         DispatchQueue.main.async {
             self.delegate = self
@@ -164,7 +167,7 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
             let diff = currentIndex - firstView.index
             if diff < (config.preloadAmount) {
                 for i in (firstView.index - (config.preloadAmount - diff)..<firstView.index).reversed() {
-                    if immediate {
+                    if immediate && !prependsNow {
                         schedulePrepend(at: i)
                     } else {
                         prependView(at: i)
@@ -225,6 +228,8 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
             if self.loadedViews.contains(where: { $0.index == index }) {
                 return
             }
+            // Skip if a jump replaced the window since this was queued
+            if let last = self.loadedViews.last, index != last.index + 1 { return }
             self.appendView(at: index)
         }
     }
@@ -266,6 +271,7 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
             if self.loadedViews.contains(where: { $0.index == index }) {
                 return
             }
+            if let first = self.loadedViews.first, index != first.index - 1 { return }
             self.prependView(at: index)
         }
     }
@@ -388,10 +394,42 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
         }
     }
     
+    func jumpIsFar(to page: Int) -> Bool {
+        guard let first = loadedViews.first, let last = loadedViews.last else { return true }
+        let reach = config.preloadAmount * 2
+        return page < first.index - reach || page > last.index + reach
+    }
+    
+    func rebuildWindow(around page: Int) {
+        delegate = nil
+        DispatchQueue.main.async {
+            self.delegate = self
+        }
+        for view in loadedViews {
+            view.removeFromSuperview()
+        }
+        loadedViews.removeAll()
+        contentOffset = .zero
+        for i in page...(page + config.preloadAmount) {
+            appendView(at: i)
+        }
+        for i in ((page - config.preloadAmount)..<page).reversed() {
+            prependView(at: i)
+        }
+    }
+    
     func goToPage(_ page: Int, animated: Bool) {
         currentIndex = page
+        pendingJump = true
         DispatchQueue.main.async {
-            self.computeViewState(immediate: true)
+            defer { self.pendingJump = false }
+            if self.jumpIsFar(to: page) {
+                self.rebuildWindow(around: page)
+            } else {
+                self.computeViewState(immediate: true, prependsNow: true)
+            }
+            // Lay out first, or UIKit clamps the offset to the old content size
+            self.layoutIfNeeded()
             self.ensureCurrentPage(animated: animated)
         }
     }
