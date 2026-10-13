@@ -132,9 +132,9 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
             }
             for i in ((currentIndex - config.preloadAmount)..<currentIndex).reversed() {
                 if immediate {
-                    schedulePrepend(at: i)
-                } else {
                     prependView(at: i)
+                } else {
+                    schedulePrepend(at: i)
                 }
             }
         }
