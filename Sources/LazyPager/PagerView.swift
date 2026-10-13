@@ -33,6 +33,7 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
     var lastBoundsSize: CGSize?
     
     var isRotating = false
+    var anchoredPageDimension: CGFloat = 0
     var pendingJump = false
     var page: Binding<Int>
     
@@ -101,12 +102,19 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
         fatalError("Not implemented")
     }
     
+    var pageDimension: CGFloat {
+        config.direction == .horizontal ? bounds.width : bounds.height
+    }
+    
     public override func layoutSubviews() {
         super.layoutSubviews()
         if !isFirstLoad {
             ensureCurrentPage(animated: false)
             isFirstLoad = true
         } else if isRotating {
+            ensureCurrentPage(animated: false)
+        } else if pageDimension > 0, pageDimension != anchoredPageDimension, !isDragging, !isDecelerating {
+            // The offset is a multiple of the old page size, so a resize leaves it between pages
             ensureCurrentPage(animated: false)
         }
     
@@ -135,9 +143,9 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
             }
             for i in ((currentIndex - config.preloadAmount)..<currentIndex).reversed() {
                 if immediate {
-                    schedulePrepend(at: i)
-                } else {
                     prependView(at: i)
+                } else {
+                    schedulePrepend(at: i)
                 }
             }
         }
@@ -428,6 +436,7 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
     
     func ensureCurrentPage(animated: Bool) {
         guard let index = loadedViews.firstIndex(where: { $0.index == currentIndex }) else { return }
+        anchoredPageDimension = pageDimension
         if config.direction == .horizontal {
             setContentOffset(CGPoint(x: CGFloat(index) * pageWidth, y: contentOffset.y), animated: animated)
         } else {
@@ -449,6 +458,8 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
     }
     
     func scrollingFinished() {
+        config.scrollActiveCallback?(false)
+        if loadedViews.isEmpty { return }
         let newIndex = currentView.index
         
         if currentIndex != newIndex {
@@ -457,6 +468,10 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
         }
         
         computeViewState()
+        if pageDimension > 0, pageDimension != anchoredPageDimension, !isRotating {
+            // A resize happened during the drag
+            ensureCurrentPage(animated: false)
+        }
         
         hasNotfiedOverscroll = false
         resizeOutOfBoundsViews()
@@ -471,9 +486,11 @@ class PagerView<Element, Loader: ViewLoader, Content: View>: UIScrollView, UIScr
     
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
         config.dragCallback?()
+        config.scrollActiveCallback?(true)
     }
 
     public func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        if loadedViews.isEmpty { return }
         
         if !scrollView.isTracking, !isRotating, (currentView.index != page.wrappedValue || page.wrappedValue != currentIndex ) {
             currentIndex = currentView.index

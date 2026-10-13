@@ -49,6 +49,9 @@ public struct Config<Element> {
     /// Called when dragging begins
     public var dragCallback: (() -> ())?
     
+    /// Called with true when a page drag begins and false when scrolling settles
+    public var scrollActiveCallback: ((Bool) -> ())?
+    
     /// The offset used to trigger load loadMoreCallback
     public var loadMoreOn: LoadMore = .lastElement(minus: 3)
     
@@ -157,6 +160,12 @@ public extension LazyPager {
         return this
     }
     
+    func onScrollActive(_ callback: @escaping (Bool) -> ()) -> LazyPager {
+        var this = self
+        this.config.scrollActiveCallback = callback
+        return this
+    }
+    
     func pageSpacing(_ spacing: CGFloat) -> LazyPager {
         var this = self
         this.config.pageSpacing = spacing
@@ -214,14 +223,10 @@ public extension LazyPager {
 
 extension LazyPager: UIViewControllerRepresentable {
     public func makeUIViewController(context: Context) -> ViewDataProvider<Content, DataCollecton, Element> {
-        let provider = ViewDataProvider(data: data,
-                                        page: page,
-                                        config: config,
-                                        viewLoader: viewLoader)
-        DispatchQueue.main.async {
-            provider.goToPage(page.wrappedValue, animated: false)
-        }
-        return provider
+        return ViewDataProvider(data: data,
+                                page: page,
+                                config: config,
+                                viewLoader: viewLoader)
     }
     
     public func updateUIViewController(_ uiViewController: ViewDataProvider<Content, DataCollecton, Element>, context: Context) {
@@ -233,10 +238,12 @@ extension LazyPager: UIViewControllerRepresentable {
             uiViewController.goToPage(page.wrappedValue, animated: context.transaction.animation != nil)
         }
         
-        if page.wrappedValue >= data.count {
-            uiViewController.goToPage(data.count - 1, animated: false)
-        } else if page.wrappedValue < 0 {
-            uiViewController.goToPage(0, animated: false)
+        if !data.isEmpty {
+            if page.wrappedValue >= data.count {
+                uiViewController.goToPage(data.count - 1, animated: false)
+            } else if page.wrappedValue < 0 {
+                uiViewController.goToPage(0, animated: false)
+            }
         }
     }
 }
