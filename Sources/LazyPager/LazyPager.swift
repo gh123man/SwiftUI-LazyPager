@@ -242,10 +242,12 @@ extension LazyPager: UIViewControllerRepresentable {
             uiViewController.goToPage(page.wrappedValue, animated: context.transaction.animation != nil)
         }
         
-        if page.wrappedValue >= data.count {
-            uiViewController.goToPage(data.count - 1, animated: false)
-        } else if page.wrappedValue < 0 {
-            uiViewController.goToPage(0, animated: false)
+        if !data.isEmpty {
+            if page.wrappedValue >= data.count {
+                uiViewController.goToPage(data.count - 1, animated: false)
+            } else if page.wrappedValue < 0 {
+                uiViewController.goToPage(0, animated: false)
+            }
         }
     }
 }
